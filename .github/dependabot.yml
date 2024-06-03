@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "16:00"
+    groups:
+      all:
+        patterns:
+          - "*"
+  - package-ecosystem: "gomod"
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "16:00"
+    allow:
+      # Allow both direct and indirect updates for all packages
+      - dependency-type: "all"
+    groups:
+      all:
+        patterns:
+          - "*"

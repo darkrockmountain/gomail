@@ -1,0 +1,22 @@
+name: Check Source Branch
+
+permissions: read-all
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check_pr:
+    runs-on: ubuntu-latest
+
+    env:
+      ALLOWED_BRANCHES: ${{ vars.MAIN_PR_SOURCE_BRANCHES }}
+
+    steps:
+      - name: Check if PR is from an allowed branch
+        if: ${{ !contains(fromJson(env.ALLOWED_BRANCHES), github.event.pull_request.head.ref) }}
+        run: |
+            echo "Pull requests to main must come from one of the allowed branches: $ALLOWED_BRANCHES." >&2
+            exit 1
