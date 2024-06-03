@@ -7,7 +7,7 @@
 [![codecov](https://codecov.io/gh/DarkRockMountain/gomail/graph/badge.svg?token=NC0O7RMK2X)](https://codecov.io/gh/DarkRockMountain/gomail)
 ![Vulnerability assessment Status](https://github.com/darkrockmountain/gomail/actions/workflows/govulncheck.yaml/badge.svg)
 [![FOSSA Status](https://app.fossa.com/api/projects/custom%2B45301%2Fgithub.com%2FDarkRockMountain%2Fgomail.svg?type=shield&issueType=license)](https://app.fossa.com/projects/custom%2B45301%2Fgithub.com%2FDarkRockMountain%2Fgomail?ref=badge_shield&issueType=license)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/darkrockmountain/gomail/badge)](https://scorecard.dev/viewer/?uri=github.com/darkrockmountain/gomail)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/DarkRockMountain/gomail/badge)](https://scorecard.dev/viewer/?uri=github.com/DarkRockMountain/gomail)
 [![GitHub Release](https://img.shields.io/github/v/release/darkrockmountain/gomail)](https://github.com/darkrockmountain/gomail/releases)
 <!-- [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=your-project-key&metric=alert_status)](https://sonarcloud.io/dashboard?id=your-project-key) -->
 ## Project Description
