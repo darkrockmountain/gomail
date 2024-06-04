@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/darkrockmountain/gomail"
-	"github.com/darkrockmountain/gomail/providers"
+	"github.com/darkrockmountain/gomail/providers/smtp"
 )
 
 // SendEmail is the HTTP handler that processes the incoming request
@@ -31,11 +31,11 @@ func SendEmail(w http.ResponseWriter, r *http.Request) {
 	}
 	user := os.Getenv("SMTP_USER")
 	password := os.Getenv("SMTP_PASSWORD")
-	authMethod := providers.AuthMethod(os.Getenv("SMTP_AUTH_METHOD"))
+	authMethod := smtp.AuthMethod(os.Getenv("SMTP_AUTH_METHOD"))
 
 	// Initialize the SMTP email sender with the retrieved configuration values.
 	// You can choose any other email sender implementation by replacing NewSmtpEmailSender with another constructor.
-	sender, err := providers.NewSmtpEmailSender(
+	sender, err := smtp.NewSmtpEmailSender(
 		host,
 		port,
 		user,

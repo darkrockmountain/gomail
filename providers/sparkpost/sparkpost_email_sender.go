@@ -1,4 +1,4 @@
-package providers
+package sparkpost
 
 import (
 	"fmt"

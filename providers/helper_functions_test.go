@@ -49,7 +49,7 @@ func TestBuildMimeMessage(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.message.Subject, func(t *testing.T) {
-			result, err := buildMimeMessage(test.message)
+			result, err := BuildMimeMessage(test.message)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}

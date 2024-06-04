@@ -17,7 +17,7 @@ jsonCredentials := []byte(`{
 user := "user@domain.com"
 
 // Initialize the GmailEmailSender
-emailSender, err := providers.NewGmailEmailSenderServiceAccount(jsonCredentials, user)
+emailSender, err := gmail.NewGmailEmailSenderServiceAccount(jsonCredentials, user)
 if err != nil {
     log.Fatalf("Failed to create GmailEmailSender: %v", err)
 }
@@ -131,7 +131,7 @@ tokenManager := &MyTokenManager{
 }
 
 // Create GmailEmailSender with the parsed credentials and token
-emailSender, err := providers.NewGmailEmailSenderOauth2(credentials, tokenManager, "me")
+emailSender, err := gmail.NewGmailEmailSenderOauth2(credentials, tokenManager, "me")
 if err != nil {
 	log.Fatalf("Failed to create email sender: %v", err)
 }

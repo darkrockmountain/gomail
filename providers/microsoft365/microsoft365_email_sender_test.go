@@ -1,4 +1,4 @@
-package providers
+package microsoft365
 
 import (
 	"bytes"

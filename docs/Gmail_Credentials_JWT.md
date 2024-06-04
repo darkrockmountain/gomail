@@ -71,7 +71,7 @@ jsonCredentials := []byte(`{
 user := "user@domain.com"
 
 // Initialize the GmailEmailSender
-emailSender, err := providers.NewGmailEmailSenderJWT(jsonCredentials, user)
+emailSender, err := gmail.NewGmailEmailSenderJWT(jsonCredentials, user)
 if err != nil {
     log.Fatalf("Failed to create GmailEmailSender: %v", err)
 }

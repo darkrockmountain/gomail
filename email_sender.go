@@ -9,6 +9,7 @@
 // This project is organized into several packages:
 //
 // - providers: Contains implementations for various email providers.
+// - credentials: Contains implementations for managing email credentials.
 // - examples: Contains example applications demonstrating how to use the library.
 // - docs: Contains documentation for configuring different email providers.
 //
@@ -22,12 +23,12 @@
 //	package main
 //
 //	import (
-//	    "github.com/darkrockmountain/gomail/providers"
+//	    "github.com/darkrockmountain/gomail/providers/sendgrid"
 //	)
 //
 //	func main() {
-//	    sender := providers.NewSendGridEmailSender("your-api-key")
-//	    err := sender.SendEmail("recipient@example.com", "Subject", "Email body")
+//	    sender := sendgrid.NewSendGridEmailSender("your-api-key")
+//	    err := sender.SendEmail(EmailMessage{To:[]string{"recipient@example.com"}, Subject:"Subject", Text:"Email body"})
 //	    if err != nil {
 //	        log.Fatal(err)
 //	    }
