@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/darkrockmountain/gomail"
 	"github.com/stretchr/testify/assert"
@@ -66,6 +67,25 @@ func TestMandrillEmailSender_SendEmailWithError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestMandrillEmailSender_SendEmailNewRequestError(t *testing.T) {
+	emailSender, err := NewMandrillEmailSender("test-api-key")
+	assert.NoError(t, err)
+
+	message := gomail.EmailMessage{
+		From:    "sender@example.com",
+		To:      []string{"recipient@example.com"},
+		Subject: "Test Email",
+		Text:    "This is a test email.",
+	}
+
+	emailSender.url = "no a url"
+	emailSender.requestMethod = "no a request method"
+
+	err = emailSender.SendEmail(message)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to create HTTP request")
+}
+
 func TestMandrillEmailSender_SendEmailWithSendError(t *testing.T) {
 	emailSender, err := NewMandrillEmailSender("test-api-key")
 	assert.NoError(t, err)
@@ -79,6 +99,31 @@ func TestMandrillEmailSender_SendEmailWithSendError(t *testing.T) {
 
 	// Mock server to simulate a server error
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "server error", http.StatusInternalServerError)
+	}))
+	defer ts.Close()
+
+	emailSender.url = ts.URL
+
+	err = emailSender.SendEmail(message)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to send email via Mandrill API")
+}
+
+func TestMandrillEmailSender_SendEmailWithSendTimeOutError(t *testing.T) {
+	emailSender, err := NewMandrillEmailSender("test-api-key")
+	assert.NoError(t, err)
+
+	message := gomail.EmailMessage{
+		From:    "sender@example.com",
+		To:      []string{"recipient@example.com"},
+		Subject: "Test Email",
+		Text:    "This is a test email.",
+	}
+
+	// Mock server to simulate a server error
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(2 * clientTimeOut) // Wait for 2 times the clientTimeout
 		http.Error(w, "server error", http.StatusInternalServerError)
 	}))
 	defer ts.Close()

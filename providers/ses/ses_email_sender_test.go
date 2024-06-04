@@ -2,6 +2,7 @@ package ses
 
 import (
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -42,6 +43,22 @@ func TestNewSESEmailSenderWithCredentials(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, emailSender)
 	assert.Equal(t, "sender@example.com", emailSender.sender)
+}
+
+func TestNewSESEmailSenderError(t *testing.T) {
+	os.Setenv("AWS_STS_REGIONAL_ENDPOINTS", "made up endpoint")
+	defer os.Unsetenv("AWS_STS_REGIONAL_ENDPOINTS")
+	emailSender, err := NewSESEmailSender("us-west-2", "sender@example.com")
+	assert.Error(t, err)
+	assert.Nil(t, emailSender)
+}
+
+func TestNewSESEmailSenderWithCredentialsError(t *testing.T) {
+	os.Setenv("AWS_STS_REGIONAL_ENDPOINTS", "made up endpoint")
+	defer os.Unsetenv("AWS_STS_REGIONAL_ENDPOINTS")
+	emailSender, err := NewSESEmailSenderWithCredentials("us-west-2", "sender@example.com", "accessKeyID", "secretAccessKey")
+	assert.Error(t, err)
+	assert.Nil(t, emailSender)
 }
 
 func TestSESEmailSender_SendEmail(t *testing.T) {

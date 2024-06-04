@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/darkrockmountain/gomail"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBuildMimeMessage(t *testing.T) {
@@ -45,6 +46,18 @@ func TestBuildMimeMessage(t *testing.T) {
 			},
 			[]string{"From: sender@example.com", "To: recipient@example.com", "Cc: cc@example.com", "Subject: Test Email", "This is a test email.", "Content-Disposition: attachment; filename=\"test.txt\"", base64.StdEncoding.EncodeToString([]byte("This is a test attachment."))},
 		},
+		{
+			gomail.EmailMessage{
+				From:    "sender@example.com",
+				To:      []string{"recipient@example.com"},
+				CC:      []string{"cc@example.com"},
+				BCC:     []string{"bcc@example.com"},
+				Subject: "Test Email",
+				Text:    "This is a test email.",
+				ReplyTo: "reply-to@example.com",
+			},
+			[]string{"From: sender@example.com", "To: recipient@example.com", "Cc: cc@example.com", "Subject: Test Email", "This is a test email.", "Reply-To: reply-to@example.com"},
+		},
 	}
 
 	for _, test := range tests {
@@ -61,4 +74,13 @@ func TestBuildMimeMessage(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestStrPtr(t *testing.T) {
+
+	str := "String to test for pointer"
+	ptrStr := StrPtr(str)
+	assert.Equal(t, ptrStr, &str)
+	assert.EqualValues(t, ptrStr, &str)
+
 }

@@ -15,6 +15,7 @@ import (
 const (
 	mandrillRequestMethod = "POST"
 	mandrillRequestURL    = "https://mandrillapp.com/api/1.0/messages/send.json"
+	clientTimeOut         = time.Millisecond * 100
 )
 
 // mandrillEmailSender defines a struct for sending emails using the Mandrill API.
@@ -117,7 +118,7 @@ func (s *mandrillEmailSender) SendEmail(message gomail.EmailMessage) error {
 
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: time.Second * 10}
+	client := &http.Client{Timeout: clientTimeOut}
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to send email via Mandrill API")

@@ -15,6 +15,7 @@ import (
 const (
 	postMarkRequestMethod = "POST"
 	postMarkRequestURL    = "https://api.postmarkapp.com/email"
+	clientTimeOut         = time.Millisecond * 100
 )
 
 // postmarkEmailSender defines a struct for sending emails using the Postmark API.
@@ -92,7 +93,7 @@ func (s *postmarkEmailSender) SendEmail(message gomail.EmailMessage) error {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Postmark-Server-Token", s.serverToken)
 
-	client := &http.Client{Timeout: time.Second * 10}
+	client := &http.Client{Timeout: clientTimeOut}
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to send email via Postmark API")
