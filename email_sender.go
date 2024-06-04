@@ -62,6 +62,8 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
+const DefaultMaxAttachmentSize = 25 * 1024 * 1024 // 25 MB
+
 // EmailSender interface defines the method to send an email.
 // Implement this interface to create different email sending strategies.
 type EmailSender interface {
@@ -77,15 +79,17 @@ type EmailSender interface {
 // Use this struct to specify the sender, recipient, subject, and content of the email,
 // as well as any attachments.
 type EmailMessage struct {
-	From        string       `json:"from"`        // Sender email address.
-	To          []string     `json:"to"`          // Recipient email addresses.
-	CC          []string     `json:"cc"`          // CC recipients email addresses.
-	BCC         []string     `json:"bcc"`         // BCC recipients email addresses.
-	ReplyTo     string       `json:"replyTo"`     // Reply-To email address.
-	Subject     string       `json:"subject"`     // Email subject.
-	Text        string       `json:"text"`        // Plain text content of the email.
-	HTML        string       `json:"html"`        // HTML content of the email (optional).
-	Attachments []Attachment `json:"attachments"` // Attachments to be included in the email (optional).
+	From              string       `json:"from"`        // Sender email address.
+	To                []string     `json:"to"`          // Recipient email addresses.
+	CC                []string     `json:"cc"`          // CC recipients email addresses.
+	BCC               []string     `json:"bcc"`         // BCC recipients email addresses.
+	ReplyTo           string       `json:"replyTo"`     // Reply-To email address.
+	Subject           string       `json:"subject"`     // Email subject.
+	Text              string       `json:"text"`        // Plain text content of the email.
+	HTML              string       `json:"html"`        // HTML content of the email (optional).
+	Attachments       []Attachment `json:"attachments"` // Attachments to be included in the email (optional).
+	maxAttachmentSize int          // Maximum size for attachments.
+
 }
 
 // NewEmailMessage creates a new EmailMessage with the required fields.
@@ -100,9 +104,10 @@ type EmailMessage struct {
 //   - *EmailMessage: A pointer to the newly created EmailMessage struct.
 func NewEmailMessage(from string, to []string, subject string, body string) *EmailMessage {
 	email := &EmailMessage{
-		From:    from,
-		To:      to,
-		Subject: subject,
+		From:              from,
+		To:                to,
+		Subject:           subject,
+		maxAttachmentSize: DefaultMaxAttachmentSize,
 	}
 
 	if isHTML(body) {
@@ -130,15 +135,16 @@ func NewEmailMessage(from string, to []string, subject string, body string) *Ema
 //   - *EmailMessage: A pointer to the newly created EmailMessage struct.
 func NewFullEmailMessage(from string, to []string, subject string, cc []string, bcc []string, replyTo string, textBody string, htmlBody string, attachments []Attachment) *EmailMessage {
 	return &EmailMessage{
-		From:        from,
-		To:          to,
-		CC:          cc,
-		BCC:         bcc,
-		ReplyTo:     replyTo,
-		Subject:     subject,
-		Text:        textBody,
-		HTML:        htmlBody,
-		Attachments: attachments,
+		From:              from,
+		To:                to,
+		CC:                cc,
+		BCC:               bcc,
+		ReplyTo:           replyTo,
+		Subject:           subject,
+		Text:              textBody,
+		HTML:              htmlBody,
+		Attachments:       attachments,
+		maxAttachmentSize: DefaultMaxAttachmentSize,
 	}
 }
 
@@ -371,7 +377,18 @@ func (e *EmailMessage) GetHTML() string {
 	return bluemonday.UGCPolicy().Sanitize(e.HTML)
 }
 
-// GetAttachments returns the attachments to be included in the email.
+// SetMaxAttachmentSize sets the maximum attachment size.
+// Parameters:
+// - size: The maximum size for attachments in bytes. If set to a value less than 0, all attachments are allowed.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) SetMaxAttachmentSize(size int) *EmailMessage {
+	e.maxAttachmentSize = size
+	return e
+}
+
+// GetAttachments returns the attachments to be included in the email,
+// filtering out those that exceed the maximum size.
 // If the EmailMessage is nil, it returns an empty slice.
 //
 // Returns:
@@ -380,7 +397,18 @@ func (e *EmailMessage) GetAttachments() []Attachment {
 	if e == nil {
 		return []Attachment{}
 	}
-	return e.Attachments
+	// if maxAttachmentSize return the attachments without the limit
+	if e.maxAttachmentSize < 0 {
+		return e.Attachments
+	}
+	// return only the attachments withing the max size limit
+	var validAttachments []Attachment
+	for _, attachment := range e.Attachments {
+		if len(attachment.Content) <= e.maxAttachmentSize {
+			validAttachments = append(validAttachments, attachment)
+		}
+	}
+	return validAttachments
 }
 
 // Attachment represents an email attachment with its filename and content.
