@@ -1,4 +1,4 @@
-package providers
+package ses
 
 import (
 	"errors"

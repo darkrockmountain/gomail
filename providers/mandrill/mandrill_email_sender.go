@@ -1,5 +1,5 @@
 // mandrill_email_sender.go
-package providers
+package mandrill
 
 import (
 	"bytes"

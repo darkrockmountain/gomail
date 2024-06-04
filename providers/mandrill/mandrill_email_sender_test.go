@@ -1,4 +1,4 @@
-package providers
+package mandrill
 
 import (
 	"net/http"
@@ -9,19 +9,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewPostmarkEmailSender(t *testing.T) {
-	serverToken := "test-server-token"
-	emailSender, err := NewPostmarkEmailSender(serverToken)
+func TestNewMandrillEmailSender(t *testing.T) {
+	apiKey := "test-api-key"
+	emailSender, err := NewMandrillEmailSender(apiKey)
 	assert.NoError(t, err)
 	assert.NotNil(t, emailSender)
-	assert.Equal(t, serverToken, emailSender.serverToken)
-	assert.Equal(t, postMarkRequestMethod, emailSender.requestMethod)
-	assert.Equal(t, postMarkRequestURL, emailSender.url)
+	assert.Equal(t, apiKey, emailSender.apiKey)
 }
 
-func TestPostmarkEmailSender_SendEmail(t *testing.T) {
-	emailSender, err := NewPostmarkEmailSender("test-server-token")
+func TestMandrillEmailSender_SendEmail(t *testing.T) {
+	emailSender, err := NewMandrillEmailSender("test-api-key")
 	assert.NoError(t, err)
+
 	message := gomail.EmailMessage{
 		From:    "sender@example.com",
 		To:      []string{"recipient@example.com"},
@@ -52,11 +51,12 @@ func TestPostmarkEmailSender_SendEmail(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestPostmarkEmailSender_SendEmailWithMarshalError(t *testing.T) {
-	emailSender, err := NewPostmarkEmailSender("test-server-token")
+func TestMandrillEmailSender_SendEmailWithError(t *testing.T) {
+	emailSender, err := NewMandrillEmailSender("test-api-key")
 	assert.NoError(t, err)
+
 	message := gomail.EmailMessage{
-		From:    string(make([]byte, 1<<20)), // Intentionally large string to cause marshal error
+		From:    string(make([]byte, 1<<20)), // Intentionally large string to cause error
 		To:      []string{"recipient@example.com"},
 		Subject: "Test Email",
 		Text:    "This is a test email.",
@@ -66,25 +66,8 @@ func TestPostmarkEmailSender_SendEmailWithMarshalError(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestPostmarkEmailSender_SendEmailWithRequestCreationError(t *testing.T) {
-	emailSender, err := NewPostmarkEmailSender("test-server-token")
-	assert.NoError(t, err)
-
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
-
-	// Mock the JSON marshal function to cause an error
-
-	err = emailSender.SendEmail(message)
-	assert.Error(t, err)
-}
-
-func TestPostmarkEmailSender_SendEmailWithSendError(t *testing.T) {
-	emailSender, err := NewPostmarkEmailSender("test-server-token")
+func TestMandrillEmailSender_SendEmailWithSendError(t *testing.T) {
+	emailSender, err := NewMandrillEmailSender("test-api-key")
 	assert.NoError(t, err)
 
 	message := gomail.EmailMessage{
@@ -104,11 +87,11 @@ func TestPostmarkEmailSender_SendEmailWithSendError(t *testing.T) {
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to send email via Postmark API")
+	assert.Contains(t, err.Error(), "failed to send email via Mandrill API")
 }
 
-func TestPostmarkEmailSender_SendEmailWithNon200StatusCode(t *testing.T) {
-	emailSender, err := NewPostmarkEmailSender("test-server-token")
+func TestMandrillEmailSender_SendEmailWithNon200StatusCode(t *testing.T) {
+	emailSender, err := NewMandrillEmailSender("test-api-key")
 	assert.NoError(t, err)
 
 	message := gomail.EmailMessage{
@@ -131,8 +114,8 @@ func TestPostmarkEmailSender_SendEmailWithNon200StatusCode(t *testing.T) {
 	assert.Contains(t, err.Error(), "status code: 400")
 }
 
-func TestPostmarkEmailSender_SendEmailWithEmptyFields(t *testing.T) {
-	emailSender, err := NewPostmarkEmailSender("test-server-token")
+func TestMandrillEmailSender_SendEmailWithEmptyFields(t *testing.T) {
+	emailSender, err := NewMandrillEmailSender("test-api-key")
 	assert.NoError(t, err)
 
 	message := gomail.EmailMessage{

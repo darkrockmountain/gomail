@@ -1,4 +1,4 @@
-package providers
+package sendgrid
 
 import (
 	"encoding/base64"

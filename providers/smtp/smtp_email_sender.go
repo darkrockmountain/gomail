@@ -1,4 +1,4 @@
-package providers
+package smtp
 
 import (
 	"crypto/tls"
@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/darkrockmountain/gomail"
+	"github.com/darkrockmountain/gomail/providers"
 )
 
 // smtpEmailSender is responsible for sending emails using SMTP.
@@ -86,8 +87,7 @@ func (s *smtpEmailSender) SendEmail(message gomail.EmailMessage) error {
 	sendMailTo := message.GetTo()
 	sendMailTo = append(sendMailTo, message.GetCC()...)
 	sendMailTo = append(sendMailTo, message.GetBCC()...)
-
-	msg, err := buildMimeMessage(message)
+	msg, err := providers.BuildMimeMessage(message)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package providers
+package postmark
 
 import (
 	"bytes"

@@ -1,4 +1,4 @@
-package providers
+package smtp
 
 import (
 	"crypto/tls"

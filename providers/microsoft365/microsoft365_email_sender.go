@@ -1,4 +1,4 @@
-package providers
+package microsoft365
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/darkrockmountain/gomail"
+	"github.com/darkrockmountain/gomail/providers"
 	azureAuth "github.com/microsoft/kiota-authentication-azure-go"
 	msgraph "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
@@ -59,15 +60,14 @@ func composeMsMessage(message gomail.EmailMessage) *models.Message {
 	if message.GetHTML() != "" {
 		htmlBodyType := models.HTML_BODYTYPE
 		body.SetContentType(&htmlBodyType)
-		body.SetContent(strPtr(message.GetHTML()))
+		body.SetContent(providers.StrPtr(message.GetHTML()))
 	} else {
 		textBodyType := models.TEXT_BODYTYPE
 		body.SetContentType(&textBodyType)
-		body.SetContent(strPtr(message.GetText()))
+		body.SetContent(providers.StrPtr(message.GetText()))
 	}
-
 	msMessage := models.NewMessage()
-	msMessage.SetSubject(strPtr(message.GetSubject()))
+	msMessage.SetSubject(providers.StrPtr(message.GetSubject()))
 	msMessage.SetBody(body)
 
 	// Add sender
@@ -138,7 +138,7 @@ func composeMsMessage(message gomail.EmailMessage) *models.Message {
 		msAttachments := make([]models.Attachmentable, len(attachments))
 		for i, attachment := range attachments {
 			fileAttachment := models.NewFileAttachment()
-			fileAttachment.SetName(strPtr(attachment.GetFilename()))
+			fileAttachment.SetName(providers.StrPtr(attachment.GetFilename()))
 			fileAttachment.SetContentBytes([]byte(attachment.GetBase64StringContent()))
 			msAttachments[i] = fileAttachment
 		}
