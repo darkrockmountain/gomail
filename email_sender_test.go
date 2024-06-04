@@ -148,6 +148,7 @@ func TestEmailMessageGetters(t *testing.T) {
 		Attachments: []Attachment{
 			{Filename: "test.txt", Content: []byte("test content")},
 		},
+		maxAttachmentSize: DefaultMaxAttachmentSize,
 	}
 
 	t.Run("GetFrom", func(t *testing.T) {
@@ -507,6 +508,40 @@ func TestEmailHTMLBodySanitizers(t *testing.T) {
 	t.Run("<p> can't have href", func(t *testing.T) {
 		expected := `<p>Google</p>`
 		result := message3.GetHTML()
+		assert.Equal(t, expected, result)
+	})
+}
+
+func TestSetMaxAttachmentSize(t *testing.T) {
+	email := &EmailMessage{}
+	t.Run("SetMaxAttachmentSize", func(t *testing.T) {
+		expected := 10 * 1024 * 1024 // 10 MB
+		email.SetMaxAttachmentSize(expected)
+		assert.Equal(t, expected, email.maxAttachmentSize)
+	})
+}
+
+func TestGetAttachmentsWithMaxSize(t *testing.T) {
+	email := &EmailMessage{
+		Attachments: []Attachment{
+			{Filename: "small.txt", Content: []byte("small content")},
+			{Filename: "large.txt", Content: make([]byte, 30*1024*1024)}, // 30 MB
+		},
+		maxAttachmentSize: 25 * 1024 * 1024, // 25 MB
+	}
+
+	t.Run("GetAttachments with size limit", func(t *testing.T) {
+		expected := []Attachment{
+			{Filename: "small.txt", Content: []byte("small content")},
+		}
+		result := email.GetAttachments()
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("GetAttachments with no size limit", func(t *testing.T) {
+		email.SetMaxAttachmentSize(-1)
+		expected := email.Attachments
+		result := email.GetAttachments()
 		assert.Equal(t, expected, result)
 	})
 }
