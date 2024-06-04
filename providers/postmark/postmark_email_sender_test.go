@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/darkrockmountain/gomail"
 	"github.com/stretchr/testify/assert"
@@ -77,7 +78,8 @@ func TestPostmarkEmailSender_SendEmailWithRequestCreationError(t *testing.T) {
 		Text:    "This is a test email.",
 	}
 
-	// Mock the JSON marshal function to cause an error
+	emailSender.url = "no a url"
+	emailSender.requestMethod = "no a request method"
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -96,6 +98,8 @@ func TestPostmarkEmailSender_SendEmailWithSendError(t *testing.T) {
 
 	// Mock server to simulate a server error
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(2 * clientTimeOut) // Wait for 2 times the clientTimeout
+
 		http.Error(w, "server error", http.StatusInternalServerError)
 	}))
 	defer ts.Close()
