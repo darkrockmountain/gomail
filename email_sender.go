@@ -28,7 +28,7 @@
 //
 //	func main() {
 //	    sender := sendgrid.NewSendGridEmailSender("your-api-key")
-//	    err := sender.SendEmail(EmailMessage{To:[]string{"recipient@example.com"}, Subject:"Subject", Text:"Email body"})
+//	    err := sender.SendEmail(gomail.NewEmailMessage([]string{"recipient@example.com"},"Subject","Email body"))
 //	    if err != nil {
 //	        log.Fatal(err)
 //	    }
@@ -86,6 +86,190 @@ type EmailMessage struct {
 	Text        string       `json:"text"`        // Plain text content of the email.
 	HTML        string       `json:"html"`        // HTML content of the email (optional).
 	Attachments []Attachment `json:"attachments"` // Attachments to be included in the email (optional).
+}
+
+// NewEmailMessage creates a new EmailMessage with the required fields.
+// If the body contains HTML tags, it sets the HTML field; otherwise, it sets the Text field.
+// Parameters:
+// - from: The sender email address.
+// - to: A slice of recipient email addresses.
+// - subject: The email subject.
+// - body: The content of the email, which can be plain text or HTML.
+//
+// Returns:
+//   - *EmailMessage: A pointer to the newly created EmailMessage struct.
+func NewEmailMessage(from string, to []string, subject string, body string) *EmailMessage {
+	email := &EmailMessage{
+		From:    from,
+		To:      to,
+		Subject: subject,
+	}
+
+	if isHTML(body) {
+		email.HTML = body
+	} else {
+		email.Text = body
+	}
+
+	return email
+}
+
+// NewFullEmailMessage creates a new EmailMessage with all fields.
+// Parameters:
+// - from: The sender email address.
+// - to: A slice of recipient email addresses.
+// - subject: The email subject.
+// - cc: A slice of CC recipient email addresses (optional).
+// - bcc: A slice of BCC recipient email addresses (optional).
+// - replyTo: The reply-to email address (optional).
+// - textBody: The plain text content of the email.
+// - htmlBody: The HTML content of the email (optional).
+// - attachments: A slice of attachments (optional).
+//
+// Returns:
+//   - *EmailMessage: A pointer to the newly created EmailMessage struct.
+func NewFullEmailMessage(from string, to []string, subject string, cc []string, bcc []string, replyTo string, textBody string, htmlBody string, attachments []Attachment) *EmailMessage {
+	return &EmailMessage{
+		From:        from,
+		To:          to,
+		CC:          cc,
+		BCC:         bcc,
+		ReplyTo:     replyTo,
+		Subject:     subject,
+		Text:        textBody,
+		HTML:        htmlBody,
+		Attachments: attachments,
+	}
+}
+
+// SetFrom sets the sender email address.
+// Parameters:
+// - from: The sender email address.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) SetFrom(from string) *EmailMessage {
+	e.From = from
+	return e
+}
+
+// SetSubject sets the email subject.
+// Parameters:
+// - subject: The email subject.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) SetSubject(subject string) *EmailMessage {
+	e.Subject = subject
+	return e
+}
+
+// SetTo sets the recipient email addresses.
+// Parameters:
+// - to: A slice of recipient email addresses.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) SetTo(to []string) *EmailMessage {
+	e.To = to
+	return e
+}
+
+// SetCC sets the CC recipients email addresses.
+// Parameters:
+// - cc: A slice of CC recipient email addresses.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) SetCC(cc []string) *EmailMessage {
+	e.CC = cc
+	return e
+}
+
+// SetBCC sets the BCC recipients email addresses.
+// Parameters:
+// - bcc: A slice of BCC recipient email addresses.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) SetBCC(bcc []string) *EmailMessage {
+	e.BCC = bcc
+	return e
+}
+
+// SetReplyTo sets the reply-to email address.
+// Parameters:
+// - replyTo: The reply-to email address.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) SetReplyTo(replyTo string) *EmailMessage {
+	e.ReplyTo = replyTo
+	return e
+}
+
+// SetText sets the plain text content of the email.
+// Parameters:
+// - text: The plain text content of the email.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) SetText(text string) *EmailMessage {
+	e.Text = text
+	return e
+}
+
+// SetHTML sets the HTML content of the email.
+// Parameters:
+// - html: The HTML content of the email.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) SetHTML(html string) *EmailMessage {
+	e.HTML = html
+	return e
+}
+
+// SetAttachments sets the attachments for the email.
+// Parameters:
+// - attachments: A slice of Attachment structs to be included in the email.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) SetAttachments(attachments []Attachment) *EmailMessage {
+	e.Attachments = attachments
+	return e
+}
+
+// AddToRecipient adds a recipient email address to the To field.
+// Parameters:
+// - recipient: A recipient email address to be added.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) AddToRecipient(recipient string) *EmailMessage {
+	e.To = append(e.To, recipient)
+	return e
+}
+
+// AddCCRecipient adds a recipient email address to the CC field.
+// Parameters:
+// - recipient: A recipient email address to be added.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) AddCCRecipient(recipient string) *EmailMessage {
+	e.CC = append(e.CC, recipient)
+	return e
+}
+
+// AddBCCRecipient adds a recipient email address to the BCC field.
+// Parameters:
+// - recipient: A recipient email address to be added.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) AddBCCRecipient(recipient string) *EmailMessage {
+	e.BCC = append(e.BCC, recipient)
+	return e
+}
+
+// AddAttachment adds an attachment to the email.
+// Parameters:
+// - attachment: An Attachment struct representing the file to be attached.
+// Returns:
+//   - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) AddAttachment(attachment Attachment) *EmailMessage {
+	e.Attachments = append(e.Attachments, attachment)
+	return e
 }
 
 // GetFrom returns the trimmed and validated sender email address.
@@ -306,4 +490,15 @@ func ValidateEmailSlice(emails []string) []string {
 // SanitizeInput sanitizes a string to prevent HTML and script injection.
 func SanitizeInput(input string) string {
 	return html.EscapeString(strings.TrimSpace(input))
+}
+
+// isHTML checks if a string contains HTML tags.
+// Parameters:
+// - str: The string to check.
+//
+// Returns:
+//   - bool: True if the string contains HTML tags, otherwise false.
+func isHTML(str string) bool {
+	htmlRegex := regexp.MustCompile(`(?i)<\/?[a-z][\s\S]*>`)
+	return htmlRegex.MatchString(str)
 }

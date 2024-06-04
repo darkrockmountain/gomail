@@ -69,16 +69,16 @@ func TestSESEmailSender_SendEmail(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-		HTML:    "<p>This is a test email.</p>",
-		CC:      []string{"cc@example.com"},
-		BCC:     []string{"bcc@example.com"},
-		ReplyTo: "replyto@example.com",
-	}
+	message := *gomail.NewFullEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Email",
+		[]string{"cc@example.com"},
+		[]string{"bcc@example.com"},
+		"replyto@example.com",
+		"This is a test email.",
+		"<p>This is a test email.</p>", []gomail.Attachment{},
+	)
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -92,12 +92,7 @@ func TestSESEmailSender_SendEmailWithError(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -112,12 +107,12 @@ func TestSESEmailSender_SendEmailWithEmptyFields(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{},
-		Subject: "",
-		Text:    "",
-	}
+	message := *gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{},
+		"",
+		"",
+	)
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -131,13 +126,15 @@ func TestSESEmailSender_SendEmailWithAttachments(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := gomail.EmailMessage{
-		From:        "sender@example.com",
-		To:          []string{"recipient@example.com"},
-		Subject:     "Test Email",
-		Text:        "This is a test email.",
-		Attachments: []gomail.Attachment{{Filename: "test.txt", Content: []byte("This is a test attachment.")}},
-	}
+	message := *gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).AddAttachment(gomail.Attachment{
+		Filename: "test.txt",
+		Content:  []byte("This is a test attachment."),
+	})
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -151,13 +148,12 @@ func TestSESEmailSender_SendEmailWithReplyTo(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-		ReplyTo: "replyto@example.com",
-	}
+	message := *gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).SetReplyTo("replyto@example.com")
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
