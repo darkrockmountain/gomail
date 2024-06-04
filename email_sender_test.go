@@ -287,3 +287,226 @@ func TestEmailHTMLBodySanitzers(t *testing.T) {
 	})
 
 }
+
+func TestNewEmailMessage(t *testing.T) {
+	t.Run("create plain text email", func(t *testing.T) {
+		from := "sender@example.com"
+		to := []string{"recipient@example.com"}
+		subject := "Subject"
+		body := "Email body"
+		email := NewEmailMessage(from, to, subject, body)
+
+		assert.Equal(t, from, email.From)
+		assert.Equal(t, to, email.To)
+		assert.Equal(t, subject, email.Subject)
+		assert.Equal(t, body, email.Text)
+		assert.Equal(t, "", email.HTML)
+	})
+
+	t.Run("create HTML email", func(t *testing.T) {
+		from := "sender@example.com"
+		to := []string{"recipient@example.com"}
+		subject := "Subject"
+		body := "<p>Email body</p>"
+		email := NewEmailMessage(from, to, subject, body)
+
+		assert.Equal(t, from, email.From)
+		assert.Equal(t, to, email.To)
+		assert.Equal(t, subject, email.Subject)
+		assert.Equal(t, "", email.Text)
+		assert.Equal(t, body, email.HTML)
+	})
+}
+
+func TestNewFullEmailMessage(t *testing.T) {
+	t.Run("create full email message", func(t *testing.T) {
+		from := "sender@example.com"
+		to := []string{"recipient@example.com"}
+		cc := []string{"cc@example.com"}
+		bcc := []string{"bcc@example.com"}
+		replyTo := "replyto@example.com"
+		subject := "Subject"
+		text := "Text body"
+		html := "<p>HTML body</p>"
+		attachments := []Attachment{
+			{Filename: "test.txt", Content: []byte("test content")},
+		}
+		email := NewFullEmailMessage(from, to, subject, cc, bcc, replyTo, text, html, attachments)
+
+		assert.Equal(t, from, email.From)
+		assert.Equal(t, to, email.To)
+		assert.Equal(t, cc, email.CC)
+		assert.Equal(t, bcc, email.BCC)
+		assert.Equal(t, replyTo, email.ReplyTo)
+		assert.Equal(t, subject, email.Subject)
+		assert.Equal(t, text, email.Text)
+		assert.Equal(t, html, email.HTML)
+		assert.Equal(t, attachments, email.Attachments)
+	})
+}
+
+func TestEmailMessageSetters(t *testing.T) {
+	email := &EmailMessage{}
+
+	t.Run("SetFrom", func(t *testing.T) {
+		expected := "sender@example.com"
+		email.SetFrom(expected)
+		assert.Equal(t, expected, email.From)
+	})
+
+	t.Run("SetSubject", func(t *testing.T) {
+		expected := "Subject"
+		email.SetSubject(expected)
+		assert.Equal(t, expected, email.Subject)
+	})
+
+	t.Run("SetTo", func(t *testing.T) {
+		expected := []string{"recipient@example.com"}
+		email.SetTo(expected)
+		assert.Equal(t, expected, email.To)
+	})
+
+	t.Run("SetCC", func(t *testing.T) {
+		expected := []string{"cc@example.com"}
+		email.SetCC(expected)
+		assert.Equal(t, expected, email.CC)
+	})
+
+	t.Run("SetBCC", func(t *testing.T) {
+		expected := []string{"bcc@example.com"}
+		email.SetBCC(expected)
+		assert.Equal(t, expected, email.BCC)
+	})
+
+	t.Run("SetReplyTo", func(t *testing.T) {
+		expected := "replyto@example.com"
+		email.SetReplyTo(expected)
+		assert.Equal(t, expected, email.ReplyTo)
+	})
+
+	t.Run("SetText", func(t *testing.T) {
+		expected := "Text body"
+		email.SetText(expected)
+		assert.Equal(t, expected, email.Text)
+	})
+
+	t.Run("SetHTML", func(t *testing.T) {
+		expected := "<p>HTML body</p>"
+		email.SetHTML(expected)
+		assert.Equal(t, expected, email.HTML)
+	})
+
+	t.Run("SetAttachments", func(t *testing.T) {
+		attachment := Attachment{Filename: "test.txt", Content: []byte("test content")}
+		email.SetAttachments([]Attachment{attachment})
+		assert.Contains(t, email.Attachments, attachment)
+		assert.EqualValues(t, email.Attachments, []Attachment{attachment})
+	})
+
+	t.Run("AddAttachment", func(t *testing.T) {
+		attachment := Attachment{Filename: "test.txt", Content: []byte("test content")}
+		email.AddAttachment(attachment)
+		assert.Contains(t, email.Attachments, attachment)
+	})
+
+	t.Run("AddToRecipient", func(t *testing.T) {
+		recipient := "newrecipient@example.com"
+		email.AddToRecipient(recipient)
+		assert.Contains(t, email.To, recipient)
+	})
+
+	t.Run("AddCCRecipient", func(t *testing.T) {
+		recipient := "newcc@example.com"
+		email.AddCCRecipient(recipient)
+		assert.Contains(t, email.CC, recipient)
+	})
+
+	t.Run("AddBCCRecipient", func(t *testing.T) {
+		recipient := "newbcc@example.com"
+		email.AddBCCRecipient(recipient)
+		assert.Contains(t, email.BCC, recipient)
+	})
+}
+
+func TestAddsEmailMessageToNils(t *testing.T) {
+	t.Run("create full email message", func(t *testing.T) {
+		from := "sender@example.com"
+		to := "recipient@example.com"
+		cc := "cc@example.com"
+		bcc := "bcc@example.com"
+		replyTo := "replyto@example.com"
+		subject := "Subject"
+		text := "Text body"
+		html := "<p>HTML body</p>"
+		attachment := Attachment{Filename: "test.txt", Content: []byte("test content")}
+		email := NewFullEmailMessage(from, nil, subject, nil, nil, replyTo, text, html, nil)
+
+		email.AddToRecipient(to)
+		email.AddCCRecipient(cc)
+		email.AddBCCRecipient(bcc)
+		email.AddAttachment(attachment)
+
+		assert.Equal(t, from, email.From)
+		assert.Equal(t, []string{to}, email.To)
+		assert.Equal(t, []string{cc}, email.CC)
+		assert.Equal(t, []string{bcc}, email.BCC)
+		assert.Equal(t, replyTo, email.ReplyTo)
+		assert.Equal(t, subject, email.Subject)
+		assert.Equal(t, text, email.Text)
+		assert.Equal(t, html, email.HTML)
+		assert.Equal(t, []Attachment{attachment}, email.Attachments)
+	})
+}
+
+func TestAttachmentGetters(t *testing.T) {
+	t.Run("GetFilename", func(t *testing.T) {
+		attachment := Attachment{Filename: "test.txt"}
+		assert.Equal(t, "test.txt", attachment.GetFilename())
+		assert.Equal(t, "nil_attachment", (*Attachment)(nil).GetFilename())
+	})
+
+	t.Run("GetBase64Content", func(t *testing.T) {
+		attachment := Attachment{Filename: "test.txt", Content: []byte("hello")}
+		expected := []byte(base64.StdEncoding.EncodeToString([]byte("hello")))
+		assert.Equal(t, expected, attachment.GetBase64Content())
+		assert.Equal(t, []byte{}, (*Attachment)(nil).GetBase64Content())
+	})
+
+	t.Run("GetRawContent", func(t *testing.T) {
+		attachment := Attachment{Filename: "test.txt", Content: []byte("hello")}
+		expected := []byte("hello")
+		assert.Equal(t, expected, attachment.GetRawContent())
+		assert.Equal(t, []byte{}, (*Attachment)(nil).GetRawContent())
+	})
+}
+
+func TestEmailHTMLBodySanitizers(t *testing.T) {
+	message := EmailMessage{
+		HTML: `<div><a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">XSS<a></div>`,
+	}
+
+	t.Run("remove potential XSS attack", func(t *testing.T) {
+		expected := `<div>XSS</div>`
+		result := message.GetHTML()
+		assert.Equal(t, expected, result)
+	})
+
+	message2 := EmailMessage{
+		HTML: `<a onblur="alert(secret)" href="http://www.google.com">Google</a>`,
+	}
+
+	t.Run("on methods not allowed", func(t *testing.T) {
+		expected := `<a href="http://www.google.com" rel="nofollow">Google</a>`
+		result := message2.GetHTML()
+		assert.Equal(t, expected, result)
+	})
+
+	message3 := EmailMessage{
+		HTML: `<p href="http://www.google.com">Google</p>`,
+	}
+	t.Run("<p> can't have href", func(t *testing.T) {
+		expected := `<p>Google</p>`
+		result := message3.GetHTML()
+		assert.Equal(t, expected, result)
+	})
+}

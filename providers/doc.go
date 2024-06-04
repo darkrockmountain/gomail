@@ -22,7 +22,7 @@
 //
 //	func main() {
 //	    sender := sendgrid.NewSendGridEmailSender("your-api-key")
-//	    err := sender.SendEmail(EmailMessage{To:[]string{"recipient@example.com"}, Subject:"Subject", Text:"Email body"})
+//	    err := sender.SendEmail(gomail.NewEmailMessage([]string{"recipient@example.com"},"Subject","Email body"))
 //	    if err != nil {
 //	        log.Fatal(err)
 //	    }

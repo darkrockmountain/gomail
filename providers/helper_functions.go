@@ -22,19 +22,15 @@ import (
 //
 // Example:
 //
-//	message := EmailMessage{
-//	    From:    "sender@example.com",
-//	    To:      ["recipient@example.com"],
-//	    Subject: "Test Email",
-//	    Text:    "This is a test email.",
-//	    HTML:    "<p>This is a test email.</p>",
-//	    Attachments: []Attachment{
-//	        {
-//	            Filename: "test.txt",
-//	            Content:  []byte("This is a test attachment."),
-//	        },
-//	    },
-//	}
+//	message := *gomail.NewEmailMessage(
+//		"sender@example.com",
+//		[]string["recipient@example.com"],
+//		"Test Email",
+//		"This is a test email.",)
+//		.SetHtml("<p>This is a test email.</p>").AddAttachment(Attachment{
+//		Filename: "test.txt",
+//		Content:  []byte("This is a test attachment."),
+//	})
 //	mimeMessage, err := BuildMimeMessage(message)
 //	if err != nil {
 //	    log.Fatalf("Failed to build MIME message: %v", err)

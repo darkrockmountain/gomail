@@ -44,14 +44,13 @@ if err != nil {
 }
 
 // Define email message
-message := gomail.EmailMessage{
-    From:        sender,
-    To:          []string{"recipient@example.com"},
-    Subject:     "Test Email with attachment",
-    Text:        "This is the plain text part of the email.",
-    HTML:        "<p>This is the <b>HTML</b> part of the <i>email</i>.</p>",
-    Attachments: []gomail.Attachment{{Filename: "attachment.jpg", Content: attachmentContent}},
-}
+message := *gomail.NewEmailMessage(sender,[]string{"recipient@example.com"}, "Test Email with attachment", "This is the plain text part of the email.").
+		SetHTML("<p>This is the <b>HTML</b> part of the <i>email</i>.</p>").
+		AddAttachments(gomail.Attachment{
+			Filename: "attachment.jpg",  Content: attachmentContent,
+		})
+
+
 
 // Send email
 if err := emailSender.SendEmail(message); err != nil {
