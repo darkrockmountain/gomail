@@ -14,7 +14,7 @@ import (
 // HTML content, and multiple attachments.
 //
 // Parameters:
-// - message: An EmailMessage struct containing the details of the email to be sent.
+// - message: A pointer to an EmailMessage struct containing the details of the email to be sent.
 //
 // Returns:
 // - []byte: A byte slice containing the complete MIME message.
@@ -22,7 +22,7 @@ import (
 //
 // Example:
 //
-//	message := *gomail.NewEmailMessage(
+//	message := gomail.NewEmailMessage(
 //		"sender@example.com",
 //		[]string["recipient@example.com"],
 //		"Test Email",
@@ -36,7 +36,7 @@ import (
 //	    log.Fatalf("Failed to build MIME message: %v", err)
 //	}
 //	fmt.Println(string(mimeMessage))
-func BuildMimeMessage(message gomail.EmailMessage) ([]byte, error) {
+func BuildMimeMessage(message *gomail.EmailMessage) ([]byte, error) {
 	var msg bytes.Buffer
 
 	// Determine boundaries

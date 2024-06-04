@@ -42,11 +42,11 @@ func NewSparkPostEmailSender(apiKey string) (*sparkPostEmailSender, error) {
 // It constructs the email message from the given EmailMessage and sends it using the SparkPost API.
 //
 // Parameters:
-//   - message: An EmailMessage struct that contains the details of the email to be sent, including the sender, recipients, subject, body content, and any attachments.
+//   - message: A pointer to an EmailMessage struct that contains the details of the email to be sent, including the sender, recipients, subject, body content, and any attachments.
 //
 // Returns:
 //   - error: An error if the email sending fails, otherwise nil.
-func (s *sparkPostEmailSender) SendEmail(message gomail.EmailMessage) error {
+func (s *sparkPostEmailSender) SendEmail(message *gomail.EmailMessage) error {
 	content := sp.Content{
 		From:    message.GetFrom(),
 		Subject: message.GetSubject(),

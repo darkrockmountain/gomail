@@ -22,11 +22,11 @@ type mSGraphEmailSender struct {
 // SendEmail sends an email using the Microsoft Graph API.
 //
 // Parameters:
-//   - message: An EmailMessage struct that contains the details of the email to be sent, including the sender, recipients, subject, body content, and any attachments.
+//   - message: A pointer to an EmailMessage struct that contains the details of the email to be sent, including the sender, recipients, subject, body content, and any attachments.
 //
 // Returns:
 //   - error: An error if the email sending fails, otherwise nil.
-func (s *mSGraphEmailSender) SendEmail(message gomail.EmailMessage) error {
+func (s *mSGraphEmailSender) SendEmail(message *gomail.EmailMessage) error {
 	if s.userRequestBuilder == nil {
 		return fmt.Errorf("error: no user request builder available")
 	}
@@ -47,12 +47,12 @@ func (s *mSGraphEmailSender) SendEmail(message gomail.EmailMessage) error {
 // composeMsMessage creates a new email message based on the provided message.
 //
 // Parameters:
-//   - message: An EmailMessage struct that contains the details of the email to be sent,
+//   - message: A pointer to an EmailMessage struct that contains the details of the email to be sent,
 //     including the sender, recipients, subject, body content, and any attachments.
 //
 // Returns:
 //   - *models.Message: A pointer to the composed Message object ready to be sent via the Microsoft Graph API.
-func composeMsMessage(message gomail.EmailMessage) *models.Message {
+func composeMsMessage(message *gomail.EmailMessage) *models.Message {
 
 	// Create the message
 	body := models.NewItemBody()

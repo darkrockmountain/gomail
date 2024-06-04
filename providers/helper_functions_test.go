@@ -11,19 +11,19 @@ import (
 
 func TestBuildMimeMessage(t *testing.T) {
 	tests := []struct {
-		message  gomail.EmailMessage
+		message  *gomail.EmailMessage
 		contains []string
 	}{
 		{
-			*gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email."),
+			gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email."),
 			[]string{"From: sender@example.com", "To: recipient@example.com", "Subject: Test Email", "This is a test email."},
 		},
 		{
-			*gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "<p>This is a test email.</p>"),
+			gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "<p>This is a test email.</p>"),
 			[]string{"From: sender@example.com", "To: recipient@example.com", "Subject: Test Email", "Content-Type: text/html", "<p>This is a test email.</p>"},
 		},
 		{
-			*gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+			gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
 				SetCC([]string{"cc@example.com"}).
 				SetBCC([]string{"bcc@example.com"}).
 				SetAttachments([]gomail.Attachment{
@@ -32,7 +32,7 @@ func TestBuildMimeMessage(t *testing.T) {
 			[]string{"From: sender@example.com", "To: recipient@example.com", "Cc: cc@example.com", "Subject: Test Email", "This is a test email.", "Content-Disposition: attachment; filename=\"test.txt\"", base64.StdEncoding.EncodeToString([]byte("This is a test attachment."))},
 		},
 		{
-			*gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+			gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
 				SetCC([]string{"cc@example.com"}).
 				SetBCC([]string{"bcc@example.com"}).
 				SetReplyTo("reply-to@example.com"),

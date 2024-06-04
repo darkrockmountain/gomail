@@ -69,10 +69,10 @@ const DefaultMaxAttachmentSize = 25 * 1024 * 1024 // 25 MB
 type EmailSender interface {
 	// SendEmail sends an email with the given message.
 	// Parameters:
-	// - message: An EmailMessage struct containing the details of the email to be sent.
+	// - message: A pointer to an EmailMessage struct containing the details of the email to be sent.
 	// Returns:
 	// - error: An error if sending the email fails, otherwise nil.
-	SendEmail(message EmailMessage) error
+	SendEmail(message *EmailMessage) error
 }
 
 // EmailMessage contains the fields for sending an email.

@@ -47,7 +47,7 @@ func (ms *gmailMessageSenderWrapper) send(message *gmail.Message) (*gmail.Messag
 //
 // Returns:
 //   - error: An error if sending the email fails.
-func (s *gmailMessageSenderWrapper) SendEmail(message gomail.EmailMessage) error {
+func (s *gmailMessageSenderWrapper) SendEmail(message *gomail.EmailMessage) error {
 	mimeMessage, err := providers.BuildMimeMessage(message)
 	if err != nil {
 		return fmt.Errorf("unable to build MIME message: %w", err)
