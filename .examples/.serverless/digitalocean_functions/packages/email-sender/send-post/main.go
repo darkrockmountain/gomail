@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/darkrockmountain/gomail"
-	"github.com/darkrockmountain/gomail/providers"
+	"github.com/darkrockmountain/gomail/providers/smtp"
 )
 
 type ResponseHeaders struct {
@@ -39,9 +39,9 @@ func Main(ctx context.Context, emailReq gomail.EmailMessage) Response {
 	}
 	user := os.Getenv("SMTP_USER")
 	password := os.Getenv("SMTP_PASSWORD")
-	authMethod := providers.AuthMethod(os.Getenv("SMTP_AUTH_METHOD"))
+	authMethod := smtp.AuthMethod(os.Getenv("SMTP_AUTH_METHOD"))
 
-	sender, err := providers.NewSmtpEmailSender(host, port, user, password, authMethod)
+	sender, err := smtp.NewSmtpEmailSender(host, port, user, password, authMethod)
 	if err != nil {
 		return generateResponse(http.StatusInternalServerError, "Failed to initialize email sender")
 

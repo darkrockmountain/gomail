@@ -8,7 +8,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/darkrockmountain/gomail"
-	"github.com/darkrockmountain/gomail/providers"
+	"github.com/darkrockmountain/gomail/providers/smtp"
 )
 
 func SendEmail(w http.ResponseWriter, r *http.Request) {
@@ -30,9 +30,9 @@ func SendEmail(w http.ResponseWriter, r *http.Request) {
 	}
 	user := os.Getenv("SMTP_USER")
 	password := os.Getenv("SMTP_PASSWORD")
-	authMethod := providers.AuthMethod(os.Getenv("SMTP_AUTH_METHOD"))
+	authMethod := smtp.AuthMethod(os.Getenv("SMTP_AUTH_METHOD"))
 
-	sender, err = providers.NewSmtpEmailSender(
+	sender, err = smtp.NewSmtpEmailSender(
 		host,
 		port,
 		user,

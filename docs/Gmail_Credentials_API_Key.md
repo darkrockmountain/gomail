@@ -31,7 +31,7 @@ apiKey := "your-api-key"
 user := "me"
 
 // Initialize the GmailEmailSender
-emailSender, err := providers.NewGmailEmailSenderAPIKey(apiKey, user)
+emailSender, err := gmail.NewGmailEmailSenderAPIKey(apiKey, user)
 if err != nil {
     log.Fatalf("Failed to create GmailEmailSender: %v", err)
 }

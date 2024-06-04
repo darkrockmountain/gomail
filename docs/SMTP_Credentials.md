@@ -29,7 +29,7 @@ password := "your-password"
 authMethod := AUTH_PLAIN
 
 // Create SmtpEmailSender with the SMTP server settings
-emailSender, _ := providers.NewSmtpEmailSender(
+emailSender, _ := gmail.NewSmtpEmailSender(
     host,
     port,
     user,

@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/darkrockmountain/gomail"
-	"github.com/darkrockmountain/gomail/providers"
+	"github.com/darkrockmountain/gomail/providers/smtp"
 )
 
 // handler is the main Lambda function handler that processes the incoming API Gateway request
@@ -38,11 +38,11 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 	user := os.Getenv("SMTP_USER")
 	password := os.Getenv("SMTP_PASSWORD")
-	authMethod := providers.AuthMethod(os.Getenv("SMTP_AUTH_METHOD"))
+	authMethod := smtp.AuthMethod(os.Getenv("SMTP_AUTH_METHOD"))
 
 	// Initialize the SMTP email sender with the retrieved configuration values.
 	// You can choose any other email sender implementation by replacing NewSmtpEmailSender with another constructor.
-	sender, err := providers.NewSmtpEmailSender(
+	sender, err := smtp.NewSmtpEmailSender(
 		host,
 		port,
 		user,
