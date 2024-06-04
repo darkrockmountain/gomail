@@ -82,7 +82,7 @@ const (
 )
 
 // SendEmail sends an email using the specified SMTP settings and authentication method.
-func (s *smtpEmailSender) SendEmail(message gomail.EmailMessage) error {
+func (s *smtpEmailSender) SendEmail(message *gomail.EmailMessage) error {
 	// Include CC and BCC recipients in the SMTP envelope
 	sendMailTo := message.GetTo()
 	sendMailTo = append(sendMailTo, message.GetCC()...)

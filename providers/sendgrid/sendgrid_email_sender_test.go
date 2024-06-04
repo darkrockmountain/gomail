@@ -13,6 +13,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestEmailSenderImplementation checks if sendGridEmailSender implements the EmailSender interface
+func TestEmailSenderImplementation(t *testing.T) {
+	var _ gomail.EmailSender = (*sendGridEmailSender)(nil)
+}
+
 // Mocking the SendGrid API response
 func mockSendGridServer(t *testing.T, statusCode int, responseBody string) *httptest.Server {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +60,7 @@ func TestSendGridEmailSender_SendEmail(t *testing.T) {
 
 	emailSender := NewMockSendGridEmailSender("test-api-key", ts.URL)
 
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
 		SetCC([]string{"cc@example.com"}).
 		SetBCC([]string{"bcc@example.com"}).
 		SetReplyTo("replyto@example.com").
@@ -76,7 +81,7 @@ func TestSendGridEmailSender_SendEmailWithError(t *testing.T) {
 
 	emailSender := NewMockSendGridEmailSender("test-api-key", ts.URL)
 
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -89,7 +94,7 @@ func TestSendGridEmailSender_SendEmailWithNon200StatusCode(t *testing.T) {
 
 	emailSender := NewMockSendGridEmailSender("test-api-key", ts.URL)
 
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -102,7 +107,7 @@ func TestSendGridEmailSender_SendEmailWithEmptyFields(t *testing.T) {
 
 	emailSender := NewMockSendGridEmailSender("test-api-key", ts.URL)
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{},
 		"",
@@ -122,7 +127,7 @@ func TestSendGridEmailSender_SendEmailWithAttachments(t *testing.T) {
 	attachmentContent := "This is a test attachment."
 	attachmentContentBase64 := base64.StdEncoding.EncodeToString([]byte(attachmentContent))
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",

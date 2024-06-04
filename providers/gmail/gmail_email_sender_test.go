@@ -22,6 +22,11 @@ type MockTokenManager struct {
 	err   error
 }
 
+// TestEmailSenderImplementation checks if gmailMessageSenderWrapper implements the EmailSender interface
+func TestEmailSenderImplementation(t *testing.T) {
+	var _ gomail.EmailSender = (*gmailMessageSenderWrapper)(nil)
+}
+
 func (m *MockTokenManager) GetToken() ([]byte, error) {
 	return m.token, m.err
 }
@@ -100,7 +105,7 @@ func (m *mockInvalidTokenManager) GetToken() ([]byte, error) {
 func TestSendEmailWithMockService(t *testing.T) {
 	emailSender := buildMockGmailMessageSenderWrapper(nil)
 
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -108,7 +113,7 @@ func TestSendEmailWithMockService(t *testing.T) {
 
 func TestSendEmailWithSendMessageError(t *testing.T) {
 	emailSender := buildMockGmailMessageSenderWrapper(errors.New("send message error"))
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -117,7 +122,7 @@ func TestSendEmailWithSendMessageError(t *testing.T) {
 func TestSendEmailWithMockServiceError(t *testing.T) {
 	emailSender := buildMockGmailMessageSenderWrapper(errors.New("mock service error"))
 
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -126,7 +131,7 @@ func TestSendEmailWithMockServiceError(t *testing.T) {
 func TestSendEmailWithBCC(t *testing.T) {
 	emailSender := buildMockGmailMessageSenderWrapper(nil)
 
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
 		SetBCC([]string{"bcc@example.com"})
 
 	err := emailSender.SendEmail(message)
@@ -317,7 +322,7 @@ func TestNewGmailEmailSenderJWTAccessInvalidJson(t *testing.T) {
 func TestSendEmailWithNilGmailService(t *testing.T) {
 	emailSender := &gmailMessageSenderWrapper{}
 
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.Error(t, err)

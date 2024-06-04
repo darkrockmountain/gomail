@@ -12,6 +12,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestEmailSenderImplementation checks if sESEmailSender implements the EmailSender interface
+func TestEmailSenderImplementation(t *testing.T) {
+	var _ gomail.EmailSender = (*sESEmailSender)(nil)
+}
+
 // Mock SES client
 type mockSESClient struct {
 	sesiface.SESAPI
@@ -69,7 +74,7 @@ func TestSESEmailSender_SendEmail(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := *gomail.NewFullEmailMessage(
+	message := gomail.NewFullEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Email",
@@ -92,7 +97,7 @@ func TestSESEmailSender_SendEmailWithError(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -107,7 +112,7 @@ func TestSESEmailSender_SendEmailWithEmptyFields(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{},
 		"",
@@ -126,7 +131,7 @@ func TestSESEmailSender_SendEmailWithAttachments(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",
@@ -148,7 +153,7 @@ func TestSESEmailSender_SendEmailWithReplyTo(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",

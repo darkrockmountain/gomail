@@ -42,11 +42,11 @@ func NewMailgunEmailSender(domain, apiKey string) (*mailgunEmailSender, error) {
 // It constructs the email message from the given EmailMessage and sends it using the Mailgun API.
 //
 // Parameters:
-//   - message: An EmailMessage struct that contains the details of the email to be sent, including the sender, recipients, subject, body content, and any attachments.
+//   - message: A pointer to an EmailMessage struct that contains the details of the email to be sent, including the sender, recipients, subject, body content, and any attachments.
 //
 // Returns:
 //   - error: An error if the email sending fails, otherwise nil.
-func (s *mailgunEmailSender) SendEmail(message gomail.EmailMessage) error {
+func (s *mailgunEmailSender) SendEmail(message *gomail.EmailMessage) error {
 	mg := s.mailgunClient
 
 	mGMessage := mg.NewMessage(

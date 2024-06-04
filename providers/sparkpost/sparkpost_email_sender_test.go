@@ -12,6 +12,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestEmailSenderImplementation checks if sparkPostEmailSender implements the EmailSender interface
+func TestEmailSenderImplementation(t *testing.T) {
+	var _ gomail.EmailSender = (*sparkPostEmailSender)(nil)
+}
+
 type mockSparkPostClient struct {
 	client *sp.Client
 	server *httptest.Server
@@ -74,7 +79,7 @@ func TestSparkPostEmailSender_SendEmail(t *testing.T) {
 
 	emailSender := &sparkPostEmailSender{client: mockClient.client}
 
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
 		SetCC([]string{"cc@example.com"}).
 		SetBCC([]string{"bcc@example.com"}).
 		SetReplyTo("replyto@example.com").
@@ -99,7 +104,7 @@ func TestSparkPostEmailSender_SendEmailWithError(t *testing.T) {
 
 	emailSender := &sparkPostEmailSender{client: mockClient.client}
 
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -122,7 +127,7 @@ func TestSparkPostEmailSender_SendEmailWithEmptyFields(t *testing.T) {
 
 	emailSender := &sparkPostEmailSender{client: mockClient.client}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{},
 		"",
@@ -149,7 +154,7 @@ func TestSparkPostEmailSender_SendEmailWithAttachments(t *testing.T) {
 
 	emailSender := &sparkPostEmailSender{client: mockClient.client}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Email",
@@ -179,7 +184,7 @@ func TestSparkPostEmailSender_SendEmailWithReplyTo(t *testing.T) {
 
 	emailSender := &sparkPostEmailSender{client: mockClient.client}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Email",
@@ -206,7 +211,7 @@ func TestSparkPostEmailSender_SendEmailWithCC(t *testing.T) {
 
 	emailSender := &sparkPostEmailSender{client: mockClient.client}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Email",
@@ -234,7 +239,7 @@ func TestSparkPostEmailSender_SendEmailWithBCC(t *testing.T) {
 
 	emailSender := &sparkPostEmailSender{client: mockClient.client}
 
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
 		SetBCC([]string{"bcc@example.com"})
 
 	err := emailSender.SendEmail(message)

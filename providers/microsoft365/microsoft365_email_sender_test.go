@@ -21,6 +21,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TestEmailSenderImplementation checks if mSGraphEmailSender implements the EmailSender interface
+func TestEmailSenderImplementation(t *testing.T) {
+	var _ gomail.EmailSender = (*mSGraphEmailSender)(nil)
+}
+
 type MockMSAuthenticationProvider struct {
 }
 
@@ -82,7 +87,7 @@ func TestSendEmail(t *testing.T) {
 		Content:  []byte("test_attachment_content"),
 	}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",
@@ -100,7 +105,7 @@ func TestSendEmail(t *testing.T) {
 }
 
 func TestComposeMessage_PlainTextEmail(t *testing.T) {
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",
@@ -118,7 +123,7 @@ func TestComposeMessage_PlainTextEmail(t *testing.T) {
 }
 
 func TestComposeMessage_HTMLEmail(t *testing.T) {
-	message := *gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Subject", "<p>Test Body</p>")
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Subject", "<p>Test Body</p>")
 
 	msMessage := composeMsMessage(message)
 
@@ -129,7 +134,7 @@ func TestComposeMessage_HTMLEmail(t *testing.T) {
 }
 
 func TestComposeMessage_WithCC(t *testing.T) {
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",
@@ -143,7 +148,7 @@ func TestComposeMessage_WithCC(t *testing.T) {
 }
 
 func TestComposeMessage_WithBCC(t *testing.T) {
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",
@@ -157,7 +162,7 @@ func TestComposeMessage_WithBCC(t *testing.T) {
 }
 
 func TestComposeMessage_WithReplyTo(t *testing.T) {
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",
@@ -177,7 +182,7 @@ func TestComposeMessage_WithAttachments(t *testing.T) {
 		Content:  []byte("test_attachment_content"),
 	}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",
@@ -194,7 +199,7 @@ func TestComposeMessage_WithAttachments(t *testing.T) {
 }
 
 func TestComposeMessage_EmptyFields(t *testing.T) {
-	message := *gomail.NewEmailMessage("", []string{}, "", "")
+	message := gomail.NewEmailMessage("", []string{}, "", "")
 	msMessage := composeMsMessage(message)
 
 	assert.NotNil(t, msMessage)
@@ -259,7 +264,7 @@ func TestSendEmail_NoUserRequestBuilder(t *testing.T) {
 		Content:  []byte("test_attachment_content"),
 	}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",
@@ -282,7 +287,7 @@ func TestComposeMessage_LargeAttachment(t *testing.T) {
 		Content:  largeContent,
 	}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",
@@ -306,7 +311,7 @@ func TestComposeMessage_MultipleAttachments(t *testing.T) {
 		Content:  []byte("test_attachment_content2"),
 	}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",
@@ -323,7 +328,7 @@ func TestComposeMessage_MultipleAttachments(t *testing.T) {
 }
 
 func TestComposeMessage_MissingFields(t *testing.T) {
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"", "")
@@ -347,7 +352,7 @@ func TestSendEmail_FailedSend(t *testing.T) {
 		Content:  []byte("test_attachment_content"),
 	}
 
-	message := *gomail.NewEmailMessage(
+	message := gomail.NewEmailMessage(
 		"sender@example.com",
 		[]string{"recipient@example.com"},
 		"Test Subject",
