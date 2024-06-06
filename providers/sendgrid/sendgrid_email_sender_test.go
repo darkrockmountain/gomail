@@ -66,10 +66,7 @@ func TestSendGridEmailSender_SendEmail(t *testing.T) {
 		SetReplyTo("replyto@example.com").
 		SetHTML("<p>This is a test email.</p>").
 		SetBCC([]string{"bcc@example.com"}).
-		AddAttachment(gomail.Attachment{
-			Filename: "test.txt",
-			Content:  []byte("This is a test attachment."),
-		})
+		AddAttachment(*gomail.NewAttachment("test.txt", []byte("This is a test attachment.")))
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -132,10 +129,7 @@ func TestSendGridEmailSender_SendEmailWithAttachments(t *testing.T) {
 		[]string{"recipient@example.com"},
 		"Test Subject",
 		"Test Body",
-	).AddAttachment(gomail.Attachment{
-		Filename: "test.txt",
-		Content:  []byte(attachmentContent),
-	})
+	).AddAttachment(*gomail.NewAttachment("test.txt", []byte(attachmentContent)))
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -149,5 +143,5 @@ func TestSendGridEmailSender_SendEmailWithAttachments(t *testing.T) {
 	attachment.SetDisposition("attachment")
 	v3Mail.AddAttachment(attachment)
 
-	assert.Equal(t, v3Mail.Attachments[0].Content, message.Attachments[0].GetBase64StringContent())
+	assert.Equal(t, v3Mail.Attachments[0].Content, message.GetAttachments()[0].GetBase64StringContent())
 }
