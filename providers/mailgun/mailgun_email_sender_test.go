@@ -56,10 +56,7 @@ func TestMailgunEmailSender_SendEmail(t *testing.T) {
 		SetReplyTo("replyto@example.com").
 		SetHTML("<p>This is a test email.</p>").
 		SetBCC([]string{"bcc@example.com"}).
-		AddAttachment(gomail.Attachment{
-			Filename: "test.txt",
-			Content:  []byte("This is a test attachment."),
-		})
+		AddAttachment(*gomail.NewAttachment("test.txt", []byte("This is a test attachment.")))
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)

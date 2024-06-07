@@ -26,9 +26,7 @@ func TestBuildMimeMessage(t *testing.T) {
 			gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
 				SetCC([]string{"cc@example.com"}).
 				SetBCC([]string{"bcc@example.com"}).
-				SetAttachments([]gomail.Attachment{
-					{Filename: "test.txt", Content: []byte("This is a test attachment.")},
-				}),
+				SetAttachments([]gomail.Attachment{*gomail.NewAttachment("test.txt", []byte("This is a test attachment."))}),
 			[]string{"From: sender@example.com", "To: recipient@example.com", "Cc: cc@example.com", "Subject: Test Email", "This is a test email.", "Content-Disposition: attachment; filename=\"test.txt\"", base64.StdEncoding.EncodeToString([]byte("This is a test attachment."))},
 		},
 		{
@@ -41,7 +39,7 @@ func TestBuildMimeMessage(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.message.Subject, func(t *testing.T) {
+		t.Run(test.message.GetSubject(), func(t *testing.T) {
 			result, err := BuildMimeMessage(test.message)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)

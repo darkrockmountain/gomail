@@ -136,10 +136,7 @@ func TestSESEmailSender_SendEmailWithAttachments(t *testing.T) {
 		[]string{"recipient@example.com"},
 		"Test Subject",
 		"Test Body",
-	).AddAttachment(gomail.Attachment{
-		Filename: "test.txt",
-		Content:  []byte("This is a test attachment."),
-	})
+	).AddAttachment(*gomail.NewAttachment("test.txt", []byte("This is a test attachment.")))
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)

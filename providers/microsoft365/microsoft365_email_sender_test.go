@@ -82,10 +82,7 @@ func mockItemSendMailRequestBuild(err error) *users.UserItemRequestBuilder {
 }
 
 func TestSendEmail(t *testing.T) {
-	attachment := gomail.Attachment{
-		Filename: "test.txt",
-		Content:  []byte("test_attachment_content"),
-	}
+	attachment := *gomail.NewAttachment("test.txt", []byte("test_attachment_content"))
 
 	message := gomail.NewEmailMessage(
 		"sender@example.com",
@@ -177,10 +174,7 @@ func TestComposeMessage_WithReplyTo(t *testing.T) {
 
 func TestComposeMessage_WithAttachments(t *testing.T) {
 
-	attachment := gomail.Attachment{
-		Filename: "test.txt",
-		Content:  []byte("test_attachment_content"),
-	}
+	attachment := *gomail.NewAttachment("test.txt", []byte("test_attachment_content"))
 
 	message := gomail.NewEmailMessage(
 		"sender@example.com",
@@ -259,10 +253,7 @@ func TestNewMSGraphEmailSenderROPC(t *testing.T) {
 ///////////////
 
 func TestSendEmail_NoUserRequestBuilder(t *testing.T) {
-	attachment := gomail.Attachment{
-		Filename: "test.txt",
-		Content:  []byte("test_attachment_content"),
-	}
+	attachment := *gomail.NewAttachment("test.txt", []byte("test_attachment_content"))
 
 	message := gomail.NewEmailMessage(
 		"sender@example.com",
@@ -282,10 +273,7 @@ func TestSendEmail_NoUserRequestBuilder(t *testing.T) {
 
 func TestComposeMessage_LargeAttachment(t *testing.T) {
 	largeContent := make([]byte, 10*1024*1024) // 10 MB
-	attachment := gomail.Attachment{
-		Filename: "large.txt",
-		Content:  largeContent,
-	}
+	attachment := *gomail.NewAttachment("large.txt", largeContent)
 
 	message := gomail.NewEmailMessage(
 		"sender@example.com",
@@ -302,14 +290,8 @@ func TestComposeMessage_LargeAttachment(t *testing.T) {
 }
 
 func TestComposeMessage_MultipleAttachments(t *testing.T) {
-	attachment1 := gomail.Attachment{
-		Filename: "test1.txt",
-		Content:  []byte("test_attachment_content1"),
-	}
-	attachment2 := gomail.Attachment{
-		Filename: "test2.txt",
-		Content:  []byte("test_attachment_content2"),
-	}
+	attachment1 := *gomail.NewAttachment("test1.txt", []byte("test_attachment_content1"))
+	attachment2 := *gomail.NewAttachment("test2.txt", []byte("test_attachment_content2"))
 
 	message := gomail.NewEmailMessage(
 		"sender@example.com",
@@ -347,10 +329,7 @@ func TestComposeMessage_MissingFields(t *testing.T) {
 }
 
 func TestSendEmail_FailedSend(t *testing.T) {
-	attachment := gomail.Attachment{
-		Filename: "test.txt",
-		Content:  []byte("test_attachment_content"),
-	}
+	attachment := *gomail.NewAttachment("test.txt", []byte("test_attachment_content"))
 
 	message := gomail.NewEmailMessage(
 		"sender@example.com",
