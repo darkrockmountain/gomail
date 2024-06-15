@@ -1,4 +1,4 @@
-package providers
+package smtp
 
 import (
 	"crypto/tls"
@@ -13,6 +13,11 @@ import (
 	"github.com/darkrockmountain/gomail"
 	"github.com/stretchr/testify/assert"
 )
+
+// TestEmailSenderImplementation checks if smtpEmailSender implements the EmailSender interface
+func TestEmailSenderImplementation(t *testing.T) {
+	var _ gomail.EmailSender = (*smtpEmailSender)(nil)
+}
 
 // newMockSMTPServer creates a mock SMTP server for testing purposes.
 func newMockSMTPServer(t *testing.T, handler func(conn net.Conn)) *mockSMTPServer {
@@ -181,12 +186,7 @@ func TestSendEmailPlainAuth(t *testing.T) {
 	emailSender, err := NewSmtpEmailSender(host, portInt, "user", "password", AUTH_PLAIN)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err = emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -203,12 +203,7 @@ func TestSendEmailCramMD5Auth(t *testing.T) {
 	emailSender, err := NewSmtpEmailSender(host, portInt, "user", "password", AUTH_CRAM_MD5)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err = emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -225,12 +220,7 @@ func TestSendEmailError(t *testing.T) {
 	emailSender, err := NewSmtpEmailSender(host, portInt, "user", "wrongpassword", AUTH_PLAIN)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -241,12 +231,7 @@ func TestSendEmailInvalidServer(t *testing.T) {
 	emailSender, err := NewSmtpEmailSender("invalid.server.com", 587, "user", "password", AUTH_PLAIN)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -256,12 +241,7 @@ func TestSendEmailMissingSettings(t *testing.T) {
 	emailSender, err := NewSmtpEmailSender("", 0, "", "", AUTH_PLAIN)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -278,12 +258,7 @@ func TestSendEmailImplicitTLS(t *testing.T) {
 	emailSender, err := NewSmtpEmailSenderWithConnMethod(host, portInt, "user", "password", AUTH_PLAIN, CONN_IMPLICIT)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err = emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -303,12 +278,7 @@ func TestSendEmailExplicitTLS(t *testing.T) {
 	emailSender, err := NewSmtpEmailSenderWithConnMethod(host, portInt, "user", "password", AUTH_PLAIN, CONN_TLS)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err = emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -325,12 +295,7 @@ func TestSendEmailExplicitErrorTLS(t *testing.T) {
 	emailSender, err := NewSmtpEmailSenderWithConnMethod(host, portInt, "user", "password", AUTH_PLAIN, CONN_TLS)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -354,12 +319,12 @@ func TestSendTLSEmailConnectionError(t *testing.T) {
 	emailSender, err := NewSmtpEmailSenderWithConnMethod(host, portInt, "user", "password", AUTH_PLAIN, CONN_TLS)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"nonexistent@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"nonexistent@example.com"},
+		"This is a test email.",
+		"This is a test email.",
+	)
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -399,12 +364,12 @@ func TestSendTLSEmailEHLOError(t *testing.T) {
 	emailSender, err := NewSmtpEmailSenderWithConnMethod(host, portInt, "user", "password", AUTH_PLAIN, CONN_TLS)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"nonexistent@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"nonexistent@example.com"},
+		"Test Email",
+		"This is a test email.",
+	)
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -451,12 +416,12 @@ func TestSendTLSEmailAUTHError(t *testing.T) {
 	emailSender, err := NewSmtpEmailSenderWithConnMethod(host, portInt, "user", "password", AUTH_PLAIN, CONN_TLS)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"nonexistent@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"nonexistent@example.com"},
+		"This is a test email.",
+		"This is a test email.",
+	)
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -505,12 +470,12 @@ func TestSendTLSEmailMailError(t *testing.T) {
 	emailSender, err := NewSmtpEmailSenderWithConnMethod(host, portInt, "user", "password", AUTH_PLAIN, CONN_TLS)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"nonexistent@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"nonexistent@example.com"},
+		"This is a test email.",
+		"This is a test email.",
+	)
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -560,12 +525,12 @@ func TestSendTLSEmailRcptError(t *testing.T) {
 	emailSender, err := NewSmtpEmailSenderWithConnMethod(host, portInt, "user", "password", AUTH_PLAIN, CONN_TLS)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"nonexistent@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"nonexistent@example.com"},
+		"This is a test email.",
+		"This is a test email.",
+	)
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -618,12 +583,12 @@ func TestSendTLSEmailDataError(t *testing.T) {
 	emailSender, err := NewSmtpEmailSenderWithConnMethod(host, portInt, "user", "password", AUTH_PLAIN, CONN_TLS)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"nonexistent@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"nonexistent@example.com"},
+		"This is a test email.",
+		"This is a test email.",
+	)
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -677,12 +642,12 @@ func TestSendTLSEmailDataWriteError(t *testing.T) {
 	emailSender, err := NewSmtpEmailSenderWithConnMethod(host, portInt, "user", "password", AUTH_PLAIN, CONN_TLS)
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"nonexistent@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"nonexistent@example.com"},
+		"This is a test email.",
+		"This is a test email.",
+	)
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
