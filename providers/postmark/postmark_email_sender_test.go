@@ -1,13 +1,19 @@
-package providers
+package postmark
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/darkrockmountain/gomail"
 	"github.com/stretchr/testify/assert"
 )
+
+// TestEmailSenderImplementation checks if postmarkEmailSender implements the EmailSender interface
+func TestEmailSenderImplementation(t *testing.T) {
+	var _ gomail.EmailSender = (*postmarkEmailSender)(nil)
+}
 
 func TestNewPostmarkEmailSender(t *testing.T) {
 	serverToken := "test-server-token"
@@ -22,22 +28,13 @@ func TestNewPostmarkEmailSender(t *testing.T) {
 func TestPostmarkEmailSender_SendEmail(t *testing.T) {
 	emailSender, err := NewPostmarkEmailSender("test-server-token")
 	assert.NoError(t, err)
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-		HTML:    "<p>This is a test email.</p>",
-		CC:      []string{"cc@example.com"},
-		BCC:     []string{"bcc@example.com"},
-		ReplyTo: "replyto@example.com",
-		Attachments: []gomail.Attachment{
-			{
-				Filename: "test.txt",
-				Content:  []byte("This is a test attachment."),
-			},
-		},
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+		SetCC([]string{"cc@example.com"}).
+		SetBCC([]string{"bcc@example.com"}).
+		SetReplyTo("replyto@example.com").
+		SetHTML("<p>This is a test email.</p>").
+		SetBCC([]string{"bcc@example.com"}).
+		AddAttachment(*gomail.NewAttachment("test.txt", []byte("This is a test attachment.")))
 
 	// Mock server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -55,12 +52,12 @@ func TestPostmarkEmailSender_SendEmail(t *testing.T) {
 func TestPostmarkEmailSender_SendEmailWithMarshalError(t *testing.T) {
 	emailSender, err := NewPostmarkEmailSender("test-server-token")
 	assert.NoError(t, err)
-	message := gomail.EmailMessage{
-		From:    string(make([]byte, 1<<20)), // Intentionally large string to cause marshal error
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage(
+		string(make([]byte, 1<<20)), // Intentionally large string to cause marshal error
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	)
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -70,14 +67,10 @@ func TestPostmarkEmailSender_SendEmailWithRequestCreationError(t *testing.T) {
 	emailSender, err := NewPostmarkEmailSender("test-server-token")
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
-	// Mock the JSON marshal function to cause an error
+	emailSender.url = "no a url"
+	emailSender.requestMethod = "no a request method"
 
 	err = emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -87,15 +80,12 @@ func TestPostmarkEmailSender_SendEmailWithSendError(t *testing.T) {
 	emailSender, err := NewPostmarkEmailSender("test-server-token")
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	// Mock server to simulate a server error
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(2 * clientTimeOut) // Wait for 2 times the clientTimeout
+
 		http.Error(w, "server error", http.StatusInternalServerError)
 	}))
 	defer ts.Close()
@@ -111,12 +101,7 @@ func TestPostmarkEmailSender_SendEmailWithNon200StatusCode(t *testing.T) {
 	emailSender, err := NewPostmarkEmailSender("test-server-token")
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	// Mock server to simulate a non-200 status code response
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -135,12 +120,12 @@ func TestPostmarkEmailSender_SendEmailWithEmptyFields(t *testing.T) {
 	emailSender, err := NewPostmarkEmailSender("test-server-token")
 	assert.NoError(t, err)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{},
-		Subject: "",
-		Text:    "",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{},
+		"",
+		"",
+	)
 
 	// Mock server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -1,4 +1,4 @@
-package providers
+package gmail
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 
 	"github.com/darkrockmountain/gomail"
 	"github.com/darkrockmountain/gomail/credentials"
+	"github.com/darkrockmountain/gomail/providers"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"
 	"google.golang.org/api/option"
@@ -46,8 +47,8 @@ func (ms *gmailMessageSenderWrapper) send(message *gmail.Message) (*gmail.Messag
 //
 // Returns:
 //   - error: An error if sending the email fails.
-func (s *gmailMessageSenderWrapper) SendEmail(message gomail.EmailMessage) error {
-	mimeMessage, err := buildMimeMessage(message)
+func (s *gmailMessageSenderWrapper) SendEmail(message *gomail.EmailMessage) error {
+	mimeMessage, err := providers.BuildMimeMessage(message)
 	if err != nil {
 		return fmt.Errorf("unable to build MIME message: %w", err)
 	}
