@@ -1,81 +1,14 @@
-// Package gomail provides a unified interface for sending emails using various providers.
-//
-// # Overview
-//
-// The gomail project allows you to send emails using different email providers
-// such as Gmail, SendGrid, AWS SES, and others. It abstracts the provider-specific
-// details and provides a simple API for sending emails.
-//
-// This project is organized into several packages:
-//
-// - providers: Contains implementations for various email providers.
-// - credentials: Contains implementations for managing email credentials.
-// - examples: Contains example applications demonstrating how to use the library.
-// - docs: Contains documentation for configuring different email providers.
-//
-// # Usage
-//
-// To use the library, you need to import the desired provider package and create an
-// instance of the email sender for your desired provider, then call the SendEmail function.
-//
-// Example:
-//
-//	package main
-//
-//	import (
-//	    "github.com/darkrockmountain/gomail/providers/sendgrid"
-//	)
-//
-//	func main() {
-//	    sender := sendgrid.NewSendGridEmailSender("your-api-key")
-//	    err := sender.SendEmail(gomail.NewEmailMessage([]string{"recipient@example.com"},"Subject","Email body"))
-//	    if err != nil {
-//	        log.Fatal(err)
-//	    }
-//	}
-//
-// This library supports various email providers and can be extended to include more.
-//
-// # Supported Providers
-//
-// - Gmail
-// - SendGrid
-// - AWS SES
-// - Mailgun
-// - Mandrill
-// - Postmark
-// - Microsoft365
-// - SparkPost
-// - SMTP
-//
-// For more details, see the documentation for each provider in the providers package.
-package gomail
+package common
 
 import (
-	"encoding/base64"
+	"bytes"
 	"encoding/json"
-	"html"
-	"mime"
-	"os"
-	"path/filepath"
-	"regexp"
+	"fmt"
 	"strings"
-
-	"github.com/microcosm-cc/bluemonday"
+	"time"
 )
 
 const DefaultMaxAttachmentSize = 25 * 1024 * 1024 // 25 MB
-
-// EmailSender interface defines the method to send an email.
-// Implement this interface to create different email sending strategies.
-type EmailSender interface {
-	// SendEmail sends an email with the given message.
-	// Parameters:
-	// - message: A pointer to an EmailMessage struct containing the details of the email to be sent.
-	// Returns:
-	// - error: An error if sending the email fails, otherwise nil.
-	SendEmail(message *EmailMessage) error
-}
 
 // EmailMessage contains the fields for sending an email.
 // Use this struct to specify the sender, recipient, subject, and content of the email,
@@ -112,7 +45,7 @@ func NewEmailMessage(from string, to []string, subject string, body string) *Ema
 		maxAttachmentSize: DefaultMaxAttachmentSize,
 	}
 
-	if isHTML(body) {
+	if IsHTML(body) {
 		email.html = body
 	} else {
 		email.text = body
@@ -350,7 +283,7 @@ func (e *EmailMessage) GetSubject() string {
 	if e == nil {
 		return ""
 	}
-	return SanitizeInput(e.subject)
+	return sanitizeInput(e.subject)
 }
 
 // GetText returns the sanitized plain text content of the email.
@@ -363,7 +296,7 @@ func (e *EmailMessage) GetText() string {
 	if e == nil {
 		return ""
 	}
-	return SanitizeInput(e.text)
+	return sanitizeInput(e.text)
 }
 
 // GetHTML returns the sanitized HTML with only the UGC
@@ -376,7 +309,7 @@ func (e *EmailMessage) GetHTML() string {
 	if e == nil {
 		return ""
 	}
-	return bluemonday.UGCPolicy().Sanitize(e.html)
+	return sanitizeHtmlInput(e.html)
 }
 
 // SetMaxAttachmentSize sets the maximum attachment size.
@@ -411,200 +344,6 @@ func (e *EmailMessage) GetAttachments() []Attachment {
 		}
 	}
 	return validAttachments
-}
-
-// regex for validating email addresses
-var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9._\-]+\.[a-zA-Z]{2,}$`)
-
-// ValidateEmail trims the email and checks if it is a valid email address.
-// Returns the trimmed email if valid, otherwise returns an empty string.
-func ValidateEmail(email string) string {
-	trimmed := strings.TrimSpace(email)
-	if !emailRegex.MatchString(trimmed) {
-		return ""
-	}
-	return trimmed
-}
-
-// ValidateEmailSlice trims and validates each email in the slice.
-// Returns a slice of trimmed valid emails, excluding any invalid emails.
-func ValidateEmailSlice(emails []string) []string {
-	validEmails := []string{}
-	for _, email := range emails {
-		if validEmail := ValidateEmail(email); validEmail != "" {
-			validEmails = append(validEmails, validEmail)
-		}
-	}
-	return validEmails
-}
-
-// SanitizeInput sanitizes a string to prevent HTML and script injection.
-func SanitizeInput(input string) string {
-	return html.EscapeString(strings.TrimSpace(input))
-}
-
-// isHTML checks if a string contains HTML tags.
-// Parameters:
-// - str: The string to check.
-//
-// Returns:
-//   - bool: True if the string contains HTML tags, otherwise false.
-func isHTML(str string) bool {
-	htmlRegex := regexp.MustCompile(`(?i)<\/?[a-z][\s\S]*>`)
-	return htmlRegex.MatchString(str)
-}
-
-// Attachment represents an email attachment with its filename and content.
-// Use this struct to specify files to be attached to the email.
-type Attachment struct {
-	filename string // The name of the file.
-	content  []byte // The content of the file.
-}
-
-// NewAttachment creates a new Attachment instance with the specified filename and content.
-// It initializes the private fields of the Attachment struct with the provided values.
-//
-// Example:
-//
-//	content := []byte("file content")
-//	attachment := NewAttachment("document.pdf", content)
-//	fmt.Println(attachment.GetFilename()) // Output: document.pdf
-//	fmt.Println(string(attachment.GetContent())) // Output: file content
-func NewAttachment(filename string, content []byte) *Attachment {
-	return &Attachment{
-		filename: filename,
-		content:  content,
-	}
-}
-
-// NewAttachmentFromFile creates a new Attachment instance from the specified file path.
-// It reads the content of the file and initializes the private fields of the Attachment struct.
-//
-// Example:
-//
-//	attachment, err := NewAttachmentFromFile("path/to/document.pdf")
-//	if err != nil {
-//	    fmt.Println("Error creating attachment:", err)
-//	    return
-//	}
-//	fmt.Println(attachment.GetFilename()) // Output: document.pdf
-//	fmt.Println(string(attachment.GetContent())) // Output: (file content)
-func NewAttachmentFromFile(filePath string) (*Attachment, error) {
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	filename := extractFilename(filePath)
-	return NewAttachment(
-		filename,
-		content,
-	), nil
-}
-
-// extractFilename extracts the filename from the file path.
-// This is a helper function to get the filename from a given file path.
-func extractFilename(filePath string) string {
-	// Implement this function based on your needs, for simplicity using base method
-	parts := strings.Split(filePath, "/")
-	return parts[len(parts)-1]
-}
-
-// SetFilename sets the filename of the attachment.
-// It assigns the provided filename to the private filename field.
-//
-// Example:
-//
-//	var attachment Attachment
-//	attachment.SetFilename("document.pdf")
-//	fmt.Println(attachment.GetFilename()) // Output: document.pdf
-func (a *Attachment) SetFilename(filename string) {
-	a.filename = filename
-}
-
-// GetFilename safely returns the filename of the attachment.
-// It escapes special characters like "<" to become "&lt;"
-// If the attachment is nil, it returns an empty string.
-// Returns:
-//   - string: The filename as a string.
-//     Returns an "nil_attachment" string if the attachment is nil.
-func (a *Attachment) GetFilename() string {
-	if a == nil {
-		return "nil_attachment"
-	}
-	return SanitizeInput(a.filename)
-}
-
-// GetBase64StringContent returns the content of the attachment as a base64-encoded string.
-// If the attachment is nil, it returns an empty string.
-//
-// Returns:
-//   - string: The base64-encoded content of the attachment as a string.
-//     Returns an empty string if the attachment is nil.
-func (a *Attachment) GetBase64StringContent() string {
-	if a == nil {
-		return ""
-	}
-	return string(a.GetBase64Content())
-}
-
-// SetContent sets the content of the attachment.
-// It assigns the provided content to the private content field.
-//
-// Example:
-//
-//	var attachment Attachment
-//	content := []byte("file content")
-//	attachment.SetContent(content)
-//	fmt.Println(string(attachment.GetContent())) // Output: file content
-func (a *Attachment) SetContent(content []byte) {
-	a.content = content
-}
-
-// GetBase64Content returns the content of the attachment as a base64-encoded byte slice.
-// If the attachment is nil, it returns an empty byte slice.
-//
-// Returns:
-//   - []byte: The base64-encoded content of the attachment as a byte slice.
-//     Returns an empty byte slice if the attachment is nil.
-func (a *Attachment) GetBase64Content() []byte {
-	if a == nil || len(a.content) == 0 {
-		return []byte{}
-	}
-	buf := make([]byte, base64.StdEncoding.EncodedLen(len(a.content)))
-	base64.StdEncoding.Encode(buf, a.content)
-	return buf
-}
-
-// GetRawContent returns the content of the attachment as its raw byte slice.
-// If the attachment is nil, it returns an empty byte slice.
-//
-// Returns:
-//   - []byte: The content of the attachment as a byte slice.
-//     Returns an empty byte slice if the attachment is nil.
-func (a *Attachment) GetRawContent() []byte {
-	if a == nil || len(a.content) == 0 {
-		return []byte{}
-	}
-	return a.content
-}
-
-// GetMimeType returns the MIME type based on the file extension.
-// This function takes a filename, extracts its extension, and returns the corresponding MIME type.
-//
-// Parameters:
-// - filename: A string containing the name of the file whose MIME type is to be determined.
-//
-// Returns:
-// - string: The MIME type corresponding to the file extension.
-//
-// Example:
-//
-//	mimeType := GetMimeType("document.pdf")
-//	fmt.Println(mimeType) // Output: application/pdf
-func GetMimeType(filename string) string {
-	ext := strings.ToLower(filepath.Ext(filename))
-	return mime.TypeByExtension(ext)
 }
 
 // jsonEmailMessage represents the JSON structure for an email message.
@@ -706,67 +445,116 @@ func (e *EmailMessage) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// jsonAttachment represents the JSON structure for an email attachment.
-type jsonAttachment struct {
-	Filename string `json:"filename"`
-	Content  string `json:"content"` // Content will be base64 encoded
-}
-
-// MarshalJSON custom marshaler for Attachment
-// This method converts the Attachment struct into a JSON representation.
-// It creates an anonymous struct with exported fields and JSON tags,
-// copies the values from the private fields, and then marshals it to JSON.
+// BuildMimeMessage constructs the MIME message for the email, including text, HTML, and attachments.
+// This function builds a multipart MIME message based on the provided email message. It supports plain text,
+// HTML content, and multiple attachments.
+//
+// Parameters:
+// - message: A pointer to an EmailMessage struct containing the details of the email to be sent.
+//
+// Returns:
+// - []byte: A byte slice containing the complete MIME message.
+// - error: An error if constructing the MIME message fails, otherwise nil.
 //
 // Example:
 //
-//	attachment := Attachment{
-//	    filename: "file.txt",
-//	    content:  []byte("file content"),
-//	}
-//	jsonData, err := json.Marshal(attachment)
+//	message := gomail.NewEmailMessage(
+//		"sender@example.com",
+//		[]string["recipient@example.com"],
+//		"Test Email",
+//		"This is a test email.",)
+//		.SetHtml("<p>This is a test email.</p>").AddAttachment(Attachment{
+//		Filename: "test.txt",
+//		Content:  []byte("This is a test attachment."),
+//	})
+//	mimeMessage, err := BuildMimeMessage(message)
 //	if err != nil {
-//	    fmt.Println("Error marshaling to JSON:", err)
-//	    return
+//	    log.Fatalf("Failed to build MIME message: %v", err)
 //	}
-//	fmt.Println("JSON output:", string(jsonData))
-func (a Attachment) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&jsonAttachment{
-		Filename: a.filename,
-		Content:  base64.StdEncoding.EncodeToString(a.content), // Encode content to base64
-	})
-}
+//	fmt.Println(string(mimeMessage))
+func BuildMimeMessage(message *EmailMessage) ([]byte, error) {
+	var msg bytes.Buffer
 
-// UnmarshalJSON custom unmarshaler for Attachment
-// This method converts a JSON representation into an Attachment struct.
-// It creates an anonymous struct with exported fields and JSON tags,
-// unmarshals the JSON data into this struct, and then copies the values
-// to the private fields of the Attachment struct.
-//
-// Example:
-//
-//	jsonData := `{
-//	    "filename": "file.txt",
-//	    "content": "ZmlsZSBjb250ZW50" // base64 encoded "file content"
-//	}`
-//	var attachment Attachment
-//	err := json.Unmarshal([]byte(jsonData), &attachment)
-//	if err != nil {
-//	    fmt.Println("Error unmarshaling from JSON:", err)
-//	    return
-//	}
-//	fmt.Printf("Unmarshaled Attachment: %+v\n", attachment)
-func (a *Attachment) UnmarshalJSON(data []byte) error {
-	aux := &jsonAttachment{}
-	if err := json.Unmarshal(data, aux); err != nil {
-		return err
+	// Determine boundaries
+	mixedBoundary := fmt.Sprintf("mixed-boundary-%d", time.Now().UnixNano())
+	altBoundary := fmt.Sprintf("alt-boundary-%d", time.Now().UnixNano())
+
+	// Basic headers
+	msg.WriteString(fmt.Sprintf("From: %s\r\n", message.GetFrom()))
+
+	// Add To recipients
+	toRecipients := message.GetTo()
+	if len(toRecipients) > 0 {
+		msg.WriteString(fmt.Sprintf("To: %s\r\n", strings.Join(toRecipients, ",")))
 	}
 
-	a.filename = aux.Filename
-	content, err := base64.StdEncoding.DecodeString(aux.Content) // Decode content from base64
-	if err != nil {
-		return err
-	}
-	a.content = content
+	ccRecipients := message.GetCC()
 
-	return nil
+	if len(ccRecipients) > 0 {
+		msg.WriteString(fmt.Sprintf("Cc: %s\r\n", strings.Join(ccRecipients, ",")))
+	}
+
+	if message.GetReplyTo() != "" {
+		msg.WriteString(fmt.Sprintf("Reply-To: %s\r\n", message.GetReplyTo()))
+	}
+	msg.WriteString(fmt.Sprintf("Subject: %s\r\n", message.GetSubject()))
+
+	msg.WriteString("MIME-Version: 1.0\r\n")
+
+	// Use multipart/mixed if there are attachments, otherwise multipart/alternative
+	attachments := message.GetAttachments()
+	if len(attachments) > 0 {
+		msg.WriteString(fmt.Sprintf("Content-Type: multipart/mixed; boundary=%s\r\n", mixedBoundary))
+		msg.WriteString("\r\n")
+		// Start multipart/alternative
+		msg.WriteString(fmt.Sprintf("--%s\r\n", mixedBoundary))
+		msg.WriteString(fmt.Sprintf("Content-Type: multipart/alternative; boundary=%s\r\n", altBoundary))
+		msg.WriteString("\r\n")
+	} else {
+		msg.WriteString(fmt.Sprintf("Content-Type: multipart/alternative; boundary=%s\r\n", altBoundary))
+		msg.WriteString("\r\n")
+	}
+
+	// Plain text part
+	textMessage := message.GetText()
+	if textMessage != "" {
+		msg.WriteString(fmt.Sprintf("--%s\r\n", altBoundary))
+		msg.WriteString("Content-Type: text/plain; charset=UTF-8\r\n")
+		msg.WriteString("\r\n")
+		msg.WriteString(textMessage)
+		msg.WriteString("\r\n")
+	}
+
+	// HTML part
+	htmlMessage := message.GetHTML()
+	if htmlMessage != "" {
+		msg.WriteString(fmt.Sprintf("--%s\r\n", altBoundary))
+		msg.WriteString("Content-Type: text/html; charset=UTF-8\r\n")
+		msg.WriteString("\r\n")
+		msg.WriteString(htmlMessage)
+		msg.WriteString("\r\n")
+	}
+
+	// End multipart/alternative
+	msg.WriteString(fmt.Sprintf("--%s--\r\n", altBoundary))
+
+	// Attachments
+	if len(attachments) > 0 {
+		for _, attachment := range attachments {
+			fileName := attachment.GetFilename()
+			mimeType := GetMimeType(fileName)
+			msg.WriteString(fmt.Sprintf("--%s\r\n", mixedBoundary))
+			msg.WriteString(fmt.Sprintf("Content-Type: %s\r\n", mimeType))
+			msg.WriteString("Content-Transfer-Encoding: base64\r\n")
+			msg.WriteString(fmt.Sprintf("Content-Disposition: attachment; filename=\"%s\"\r\n", fileName))
+			msg.WriteString("\r\n")
+			msg.Write(attachment.GetBase64Content())
+			msg.WriteString("\r\n")
+		}
+
+		// End multipart/mixed
+		msg.WriteString(fmt.Sprintf("--%s--\r\n", mixedBoundary))
+	}
+
+	return msg.Bytes(), nil
 }

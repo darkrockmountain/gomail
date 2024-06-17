@@ -1,10 +1,9 @@
-package gomail
+package common
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -185,38 +184,6 @@ func TestNilEmailMessageGetters(t *testing.T) {
 	})
 }
 
-func TestEmailHTMLBodySanitzers(t *testing.T) {
-	message := EmailMessage{
-		html: `<div><a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">XSS<a></div>`,
-	}
-
-	t.Run("remove potential XSS attack", func(t *testing.T) {
-		expected := `<div>XSS</div>`
-		result := message.GetHTML()
-		assert.Equal(t, expected, result)
-	})
-
-	message2 := EmailMessage{
-		html: `<a onblur="alert(secret)" href="http://www.google.com">Google</a>`,
-	}
-
-	t.Run("on methods not allowed", func(t *testing.T) {
-		expected := `<a href="http://www.google.com" rel="nofollow">Google</a>`
-		result := message2.GetHTML()
-		assert.Equal(t, expected, result)
-	})
-
-	message3 := EmailMessage{
-		html: `<p href="http://www.google.com">Google</p>`,
-	}
-	t.Run("<p> can't have href", func(t *testing.T) {
-		expected := `<p>Google</p>`
-		result := message3.GetHTML()
-		assert.Equal(t, expected, result)
-	})
-
-}
-
 func TestNewEmailMessage(t *testing.T) {
 	t.Run("create plain text email", func(t *testing.T) {
 		from := "sender@example.com"
@@ -387,37 +354,6 @@ func TestAddsEmailMessageToNils(t *testing.T) {
 	})
 }
 
-func TestEmailHTMLBodySanitizers(t *testing.T) {
-	message := EmailMessage{
-		html: `<div><a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">XSS<a></div>`,
-	}
-
-	t.Run("remove potential XSS attack", func(t *testing.T) {
-		expected := `<div>XSS</div>`
-		result := message.GetHTML()
-		assert.Equal(t, expected, result)
-	})
-
-	message2 := EmailMessage{
-		html: `<a onblur="alert(secret)" href="http://www.google.com">Google</a>`,
-	}
-
-	t.Run("on methods not allowed", func(t *testing.T) {
-		expected := `<a href="http://www.google.com" rel="nofollow">Google</a>`
-		result := message2.GetHTML()
-		assert.Equal(t, expected, result)
-	})
-
-	message3 := EmailMessage{
-		html: `<p href="http://www.google.com">Google</p>`,
-	}
-	t.Run("<p> can't have href", func(t *testing.T) {
-		expected := `<p>Google</p>`
-		result := message3.GetHTML()
-		assert.Equal(t, expected, result)
-	})
-}
-
 func TestMarshalJSONCustom(t *testing.T) {
 	t.Run("Marshal EmailMessage with attachments", func(t *testing.T) {
 		email := &EmailMessage{
@@ -513,244 +449,6 @@ func TestUnmarshalJSONCustom(t *testing.T) {
 	})
 }
 
-func TestGetBase64Content(t *testing.T) {
-	tests := []struct {
-		attachment *Attachment
-		expected   []byte
-	}{
-		{&Attachment{filename: "test.txt", content: []byte("hello")}, []byte(base64.StdEncoding.EncodeToString([]byte("hello")))},
-		{&Attachment{filename: "test.txt", content: []byte("")}, []byte{}},
-		{&Attachment{filename: "empty.txt", content: nil}, []byte{}},
-	}
-
-	for _, test := range tests {
-		t.Run(test.attachment.GetFilename(), func(t *testing.T) {
-			result := test.attachment.GetBase64Content()
-			assert.Equal(t, test.expected, result)
-		})
-	}
-}
-
-func TestGetBase64StringContent(t *testing.T) {
-	tests := []struct {
-		attachment *Attachment
-		expected   string
-	}{
-		{&Attachment{filename: "test.txt", content: []byte("hello")}, base64.StdEncoding.EncodeToString([]byte("hello"))},
-		{&Attachment{filename: "test.txt", content: []byte("")}, ""},
-		{nil, ""},
-	}
-
-	for _, test := range tests {
-		t.Run(test.attachment.GetFilename(), func(t *testing.T) {
-			result := test.attachment.GetBase64StringContent()
-			assert.Equal(t, test.expected, result)
-		})
-	}
-}
-
-func TestGetRawContent(t *testing.T) {
-	tests := []struct {
-		attachment *Attachment
-		expected   []byte
-	}{
-		{&Attachment{filename: "test.txt", content: []byte("hello")}, []byte("hello")},
-		{&Attachment{filename: "test.txt", content: []byte("")}, []byte{}},
-		{&Attachment{filename: "empty.txt", content: nil}, []byte{}},
-	}
-
-	for _, test := range tests {
-		t.Run(test.attachment.GetFilename(), func(t *testing.T) {
-			result := test.attachment.GetRawContent()
-			assert.Equal(t, test.expected, result)
-		})
-	}
-}
-
-func TestGetMimeType(t *testing.T) {
-	tests := []struct {
-		filename string
-		expected string
-	}{
-		{"document.pdf", "application/pdf"},
-		{"image.png", "image/png"},
-		{"archive.zip", "application/zip"},
-		{"unknownfile.unknown", ""},
-		{"text.txt", "text/plain; charset=utf-8"},
-		{"no_extension", ""},
-	}
-
-	for _, test := range tests {
-		t.Run(test.filename, func(t *testing.T) {
-			result := GetMimeType(test.filename)
-			assert.Equal(t, test.expected, result)
-		})
-	}
-}
-
-func TestExtractFilename(t *testing.T) {
-	t.Run("extract filename from valid path", func(t *testing.T) {
-		filePath := "/path/to/file/document.pdf"
-		expected := "document.pdf"
-		result := extractFilename(filePath)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("extract filename from empty path", func(t *testing.T) {
-		filePath := ""
-		expected := ""
-		result := extractFilename(filePath)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("extract filename from path with trailing slash", func(t *testing.T) {
-		filePath := "/path/to/directory/"
-		expected := ""
-		result := extractFilename(filePath)
-		assert.Equal(t, expected, result)
-	})
-}
-
-func TestNewAttachmentFromFile(t *testing.T) {
-
-	t.Run("files in test data", func(t *testing.T) {
-		testFiles := []struct {
-			filePath        string
-			expectedName    string
-			expectedContent string
-		}{
-			{
-				filepath.Join("testdata", "testfile.txt"),
-				"testfile.txt",
-				`DarkRockMountain
-https://darkrockmountain.com/
-
-we make it possible
-
-DarkRockMountain, your trusted partner for developing, implementing, scaling, and maintaining your solutions from concept to production.`,
-			}, {
-				filepath.Join("testdata", "testfile.md"),
-				"testfile.md",
-				`# DarkRockMountain
-**[darkrockmountain.com](https://darkrockmountain.com/)**
-
-### we make it possible
-
-DarkRockMountain, your trusted partner for developing, implementing, scaling, and maintaining your solutions from concept to production.`,
-			},
-		}
-
-		for _, testFile := range testFiles {
-			attachment, err := NewAttachmentFromFile(testFile.filePath)
-			if err != nil {
-				t.Fatalf("NewAttachmentFromFile() error = %v, want nil", err)
-			}
-
-			assert.Equal(t, attachment.filename, testFile.expectedName)
-
-			content, err := os.ReadFile(testFile.filePath)
-			if err != nil {
-				t.Fatalf("Failed to read test file: %v", err)
-			}
-			assert.Equal(t, string(attachment.content), string(content))
-
-		}
-
-	})
-
-	t.Run("file does not exist", func(t *testing.T) {
-		filePath := "nonexistentfile.txt"
-		attachment, err := NewAttachmentFromFile(filePath)
-		assert.NotNil(t, err)
-		assert.Nil(t, attachment)
-	})
-
-}
-
-func TestSetMaxAttachmentSize(t *testing.T) {
-	email := &EmailMessage{}
-	t.Run("SetMaxAttachmentSize", func(t *testing.T) {
-		expected := 10 * 1024 * 1024 // 10 MB
-		email.SetMaxAttachmentSize(expected)
-		assert.Equal(t, expected, email.maxAttachmentSize)
-	})
-}
-
-func TestGetAttachmentsWithMaxSize(t *testing.T) {
-	email := &EmailMessage{
-		attachments: []Attachment{
-			{filename: "small.txt", content: []byte("small content")},
-			{filename: "large.txt", content: make([]byte, 30*1024*1024)}, // 30 MB
-		},
-		maxAttachmentSize: 25 * 1024 * 1024, // 25 MB
-	}
-
-	t.Run("GetAttachments with size limit", func(t *testing.T) {
-		expected := []Attachment{
-			{filename: "small.txt", content: []byte("small content")},
-		}
-		result := email.GetAttachments()
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("GetAttachments with no size limit", func(t *testing.T) {
-		email.SetMaxAttachmentSize(-1)
-		expected := email.attachments
-		result := email.GetAttachments()
-		assert.Equal(t, expected, result)
-	})
-}
-
-func TestSetFilename(t *testing.T) {
-	attachment := &Attachment{}
-	t.Run("SetFilename", func(t *testing.T) {
-		expected := "newfile.txt"
-		attachment.SetFilename(expected)
-		assert.Equal(t, expected, attachment.filename)
-	})
-}
-
-func TestSetContent(t *testing.T) {
-	attachment := &Attachment{}
-	t.Run("SetContent", func(t *testing.T) {
-		expected := []byte("new content")
-		attachment.SetContent(expected)
-		assert.Equal(t, expected, attachment.content)
-	})
-}
-
-func TestSanitizeInput(t *testing.T) {
-	t.Run("sanitize input with HTML", func(t *testing.T) {
-		input := "<div>Test</div>"
-		expected := "&lt;div&gt;Test&lt;/div&gt;"
-		result := SanitizeInput(input)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("sanitize input with spaces", func(t *testing.T) {
-		input := "  Test  "
-		expected := "Test"
-		result := SanitizeInput(input)
-		assert.Equal(t, expected, result)
-	})
-}
-
-func TestGetMimeTypeEdgeCases(t *testing.T) {
-	t.Run("unknown extension", func(t *testing.T) {
-		filename := "file.unknownext"
-		expected := ""
-		result := GetMimeType(filename)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("empty filename", func(t *testing.T) {
-		filename := ""
-		expected := ""
-		result := GetMimeType(filename)
-		assert.Equal(t, expected, result)
-	})
-}
-
 func TestMarshalJSONEdgeCases(t *testing.T) {
 	t.Run("nil EmailMessage", func(t *testing.T) {
 		var email *EmailMessage
@@ -829,19 +527,19 @@ func TestUnmarshalJSONEdgeCases(t *testing.T) {
 func TestIsHTMLEdgeCases(t *testing.T) {
 	t.Run("empty string", func(t *testing.T) {
 		input := ""
-		result := isHTML(input)
+		result := IsHTML(input)
 		assert.False(t, result)
 	})
 
 	t.Run("string without HTML tags", func(t *testing.T) {
 		input := "Just a plain text"
-		result := isHTML(input)
+		result := IsHTML(input)
 		assert.False(t, result)
 	})
 
 	t.Run("string with incomplete HTML tag", func(t *testing.T) {
 		input := "<div>Test"
-		result := isHTML(input)
+		result := IsHTML(input)
 		assert.True(t, result)
 	})
 }
@@ -958,81 +656,81 @@ func TestSetBCCEdgeCases(t *testing.T) {
 	})
 }
 
-func TestIsHTML(t *testing.T) {
+func TestSetMaxAttachmentSize(t *testing.T) {
+	email := &EmailMessage{}
+	t.Run("SetMaxAttachmentSize", func(t *testing.T) {
+		expected := 10 * 1024 * 1024 // 10 MB
+		email.SetMaxAttachmentSize(expected)
+		assert.Equal(t, expected, email.maxAttachmentSize)
+	})
+}
+
+func TestGetAttachmentsWithMaxSize(t *testing.T) {
+	email := &EmailMessage{
+		attachments: []Attachment{
+			{filename: "small.txt", content: []byte("small content")},
+			{filename: "large.txt", content: make([]byte, 30*1024*1024)}, // 30 MB
+		},
+		maxAttachmentSize: 25 * 1024 * 1024, // 25 MB
+	}
+
+	t.Run("GetAttachments with size limit", func(t *testing.T) {
+		expected := []Attachment{
+			{filename: "small.txt", content: []byte("small content")},
+		}
+		result := email.GetAttachments()
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("GetAttachments with no size limit", func(t *testing.T) {
+		email.SetMaxAttachmentSize(-1)
+		expected := email.attachments
+		result := email.GetAttachments()
+		assert.Equal(t, expected, result)
+	})
+}
+
+func TestBuildMimeMessage(t *testing.T) {
 	tests := []struct {
-		input    string
-		expected bool
+		message  *EmailMessage
+		contains []string
 	}{
-		{"<html><body>Hello</body></html>", true},
-		{"Just a plain text", false},
-		{"<div>HTML content</div>", true},
-		{"Plain text with <html> tag", true},
+		{
+			NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email."),
+			[]string{"From: sender@example.com", "To: recipient@example.com", "Subject: Test Email", "This is a test email."},
+		},
+		{
+			NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "<p>This is a test email.</p>"),
+			[]string{"From: sender@example.com", "To: recipient@example.com", "Subject: Test Email", "Content-Type: text/html", "<p>This is a test email.</p>"},
+		},
+		{
+			NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+				SetCC([]string{"cc@example.com"}).
+				SetBCC([]string{"bcc@example.com"}).
+				SetAttachments([]Attachment{*NewAttachment("test.txt", []byte("This is a test attachment."))}),
+			[]string{"From: sender@example.com", "To: recipient@example.com", "Cc: cc@example.com", "Subject: Test Email", "This is a test email.", "Content-Disposition: attachment; filename=\"test.txt\"", base64.StdEncoding.EncodeToString([]byte("This is a test attachment."))},
+		},
+		{
+			NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+				SetCC([]string{"cc@example.com"}).
+				SetBCC([]string{"bcc@example.com"}).
+				SetReplyTo("reply-to@example.com"),
+			[]string{"From: sender@example.com", "To: recipient@example.com", "Cc: cc@example.com", "Subject: Test Email", "This is a test email.", "Reply-To: reply-to@example.com"},
+		},
 	}
 
 	for _, test := range tests {
-		result := isHTML(test.input)
-		if result != test.expected {
-			t.Errorf("isHTML(%q) = %v; want %v", test.input, result, test.expected)
-		}
+		t.Run(test.message.GetSubject(), func(t *testing.T) {
+			result, err := BuildMimeMessage(test.message)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			for _, substring := range test.contains {
+				if !bytes.Contains(result, []byte(substring)) {
+					t.Fatalf("expected result to contain '%s'", substring)
+				}
+			}
+		})
 	}
-}
-
-func TestAttachmentGetters(t *testing.T) {
-	t.Run("GetFilename", func(t *testing.T) {
-		attachment := Attachment{filename: "test.txt"}
-		assert.Equal(t, "test.txt", attachment.GetFilename())
-		assert.Equal(t, "nil_attachment", (*Attachment)(nil).GetFilename())
-	})
-
-	t.Run("GetBase64Content", func(t *testing.T) {
-		attachment := Attachment{filename: "test.txt", content: []byte("hello")}
-		expected := []byte(base64.StdEncoding.EncodeToString([]byte("hello")))
-		assert.Equal(t, expected, attachment.GetBase64Content())
-		assert.Equal(t, []byte{}, (*Attachment)(nil).GetBase64Content())
-	})
-
-	t.Run("GetRawContent", func(t *testing.T) {
-		attachment := Attachment{filename: "test.txt", content: []byte("hello")}
-		expected := []byte("hello")
-		assert.Equal(t, expected, attachment.GetRawContent())
-		assert.Equal(t, []byte{}, (*Attachment)(nil).GetRawContent())
-	})
-}
-
-func TestNewAttachment(t *testing.T) {
-	filename := "testfile.txt"
-	content := []byte("This is a test file content.")
-	attachment := NewAttachment(filename, content)
-
-	if attachment.filename != filename {
-		t.Errorf("NewAttachment() = %v; want %v", attachment.filename, filename)
-	}
-
-	if string(attachment.content) != string(content) {
-		t.Errorf("NewAttachment() content = %v; want %v", string(attachment.content), string(content))
-	}
-}
-
-func TestAttachmentEdgeCases(t *testing.T) {
-	t.Run("GetBase64Content with nil content", func(t *testing.T) {
-		attachment := &Attachment{}
-		assert.Equal(t, []byte{}, attachment.GetBase64Content())
-	})
-
-	t.Run("GetBase64StringContent with nil content", func(t *testing.T) {
-		attachment := &Attachment{}
-		assert.Equal(t, "", attachment.GetBase64StringContent())
-	})
-
-	t.Run("SetContent with nil content", func(t *testing.T) {
-		attachment := &Attachment{}
-		attachment.SetContent(nil)
-		assert.Nil(t, attachment.content)
-	})
-
-	t.Run("SetFilename with empty string", func(t *testing.T) {
-		attachment := &Attachment{}
-		attachment.SetFilename("")
-		assert.Equal(t, "", attachment.filename)
-	})
 }
