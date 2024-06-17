@@ -1,4 +1,4 @@
-package providers
+package sendgrid
 
 import (
 	"encoding/base64"
@@ -12,6 +12,11 @@ import (
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
 	"github.com/stretchr/testify/assert"
 )
+
+// TestEmailSenderImplementation checks if sendGridEmailSender implements the EmailSender interface
+func TestEmailSenderImplementation(t *testing.T) {
+	var _ gomail.EmailSender = (*sendGridEmailSender)(nil)
+}
 
 // Mocking the SendGrid API response
 func mockSendGridServer(t *testing.T, statusCode int, responseBody string) *httptest.Server {
@@ -55,22 +60,13 @@ func TestSendGridEmailSender_SendEmail(t *testing.T) {
 
 	emailSender := NewMockSendGridEmailSender("test-api-key", ts.URL)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-		HTML:    "<p>This is a test email.</p>",
-		CC:      []string{"cc@example.com"},
-		BCC:     []string{"bcc@example.com"},
-		ReplyTo: "replyto@example.com",
-		Attachments: []gomail.Attachment{
-			{
-				Filename: "test.txt",
-				Content:  []byte("This is a test attachment."),
-			},
-		},
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+		SetCC([]string{"cc@example.com"}).
+		SetBCC([]string{"bcc@example.com"}).
+		SetReplyTo("replyto@example.com").
+		SetHTML("<p>This is a test email.</p>").
+		SetBCC([]string{"bcc@example.com"}).
+		AddAttachment(*gomail.NewAttachment("test.txt", []byte("This is a test attachment.")))
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -82,12 +78,7 @@ func TestSendGridEmailSender_SendEmailWithError(t *testing.T) {
 
 	emailSender := NewMockSendGridEmailSender("test-api-key", ts.URL)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -100,12 +91,7 @@ func TestSendGridEmailSender_SendEmailWithNon200StatusCode(t *testing.T) {
 
 	emailSender := NewMockSendGridEmailSender("test-api-key", ts.URL)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -118,12 +104,12 @@ func TestSendGridEmailSender_SendEmailWithEmptyFields(t *testing.T) {
 
 	emailSender := NewMockSendGridEmailSender("test-api-key", ts.URL)
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{},
-		Subject: "",
-		Text:    "",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{},
+		"",
+		"",
+	)
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -138,18 +124,12 @@ func TestSendGridEmailSender_SendEmailWithAttachments(t *testing.T) {
 	attachmentContent := "This is a test attachment."
 	attachmentContentBase64 := base64.StdEncoding.EncodeToString([]byte(attachmentContent))
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-		Attachments: []gomail.Attachment{
-			{
-				Filename: "test.txt",
-				Content:  []byte(attachmentContent),
-			},
-		},
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).AddAttachment(*gomail.NewAttachment("test.txt", []byte(attachmentContent)))
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -163,5 +143,5 @@ func TestSendGridEmailSender_SendEmailWithAttachments(t *testing.T) {
 	attachment.SetDisposition("attachment")
 	v3Mail.AddAttachment(attachment)
 
-	assert.Equal(t, v3Mail.Attachments[0].Content, message.Attachments[0].GetBase64StringContent())
+	assert.Equal(t, v3Mail.Attachments[0].Content, message.GetAttachments()[0].GetBase64StringContent())
 }

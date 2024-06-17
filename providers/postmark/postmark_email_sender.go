@@ -1,4 +1,4 @@
-package providers
+package postmark
 
 import (
 	"bytes"
@@ -15,6 +15,7 @@ import (
 const (
 	postMarkRequestMethod = "POST"
 	postMarkRequestURL    = "https://api.postmarkapp.com/email"
+	clientTimeOut         = time.Millisecond * 100
 )
 
 // postmarkEmailSender defines a struct for sending emails using the Postmark API.
@@ -42,11 +43,11 @@ func NewPostmarkEmailSender(serverToken string) (*postmarkEmailSender, error) {
 // It constructs the email message from the given EmailMessage and sends it using the Postmark API.
 //
 // Parameters:
-//   - message: An EmailMessage struct that contains the details of the email to be sent, including the sender, recipients, subject, body content, and any attachments.
+//   - message: A pointer to an EmailMessage struct that contains the details of the email to be sent, including the sender, recipients, subject, body content, and any attachments.
 //
 // Returns:
 //   - error: An error if the email sending fails, otherwise nil.
-func (s *postmarkEmailSender) SendEmail(message gomail.EmailMessage) error {
+func (s *postmarkEmailSender) SendEmail(message *gomail.EmailMessage) error {
 	emailStruct := struct {
 		From        string               `json:"From"`
 		To          string               `json:"To"`
@@ -92,7 +93,7 @@ func (s *postmarkEmailSender) SendEmail(message gomail.EmailMessage) error {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("X-Postmark-Server-Token", s.serverToken)
 
-	client := &http.Client{Timeout: time.Second * 10}
+	client := &http.Client{Timeout: clientTimeOut}
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to send email via Postmark API")

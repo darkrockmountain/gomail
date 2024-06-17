@@ -1,7 +1,8 @@
-package providers
+package ses
 
 import (
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -10,6 +11,11 @@ import (
 	"github.com/darkrockmountain/gomail"
 	"github.com/stretchr/testify/assert"
 )
+
+// TestEmailSenderImplementation checks if sESEmailSender implements the EmailSender interface
+func TestEmailSenderImplementation(t *testing.T) {
+	var _ gomail.EmailSender = (*sESEmailSender)(nil)
+}
 
 // Mock SES client
 type mockSESClient struct {
@@ -44,6 +50,22 @@ func TestNewSESEmailSenderWithCredentials(t *testing.T) {
 	assert.Equal(t, "sender@example.com", emailSender.sender)
 }
 
+func TestNewSESEmailSenderError(t *testing.T) {
+	os.Setenv("AWS_STS_REGIONAL_ENDPOINTS", "made up endpoint")
+	defer os.Unsetenv("AWS_STS_REGIONAL_ENDPOINTS")
+	emailSender, err := NewSESEmailSender("us-west-2", "sender@example.com")
+	assert.Error(t, err)
+	assert.Nil(t, emailSender)
+}
+
+func TestNewSESEmailSenderWithCredentialsError(t *testing.T) {
+	os.Setenv("AWS_STS_REGIONAL_ENDPOINTS", "made up endpoint")
+	defer os.Unsetenv("AWS_STS_REGIONAL_ENDPOINTS")
+	emailSender, err := NewSESEmailSenderWithCredentials("us-west-2", "sender@example.com", "accessKeyID", "secretAccessKey")
+	assert.Error(t, err)
+	assert.Nil(t, emailSender)
+}
+
 func TestSESEmailSender_SendEmail(t *testing.T) {
 	mockClient := createMockSESClient(&ses.SendEmailOutput{}, nil)
 
@@ -52,16 +74,16 @@ func TestSESEmailSender_SendEmail(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-		HTML:    "<p>This is a test email.</p>",
-		CC:      []string{"cc@example.com"},
-		BCC:     []string{"bcc@example.com"},
-		ReplyTo: "replyto@example.com",
-	}
+	message := gomail.NewFullEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Email",
+		[]string{"cc@example.com"},
+		[]string{"bcc@example.com"},
+		"replyto@example.com",
+		"This is a test email.",
+		"<p>This is a test email.</p>", []gomail.Attachment{},
+	)
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -75,12 +97,7 @@ func TestSESEmailSender_SendEmailWithError(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -95,12 +112,12 @@ func TestSESEmailSender_SendEmailWithEmptyFields(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{},
-		Subject: "",
-		Text:    "",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{},
+		"",
+		"",
+	)
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -114,13 +131,12 @@ func TestSESEmailSender_SendEmailWithAttachments(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := gomail.EmailMessage{
-		From:        "sender@example.com",
-		To:          []string{"recipient@example.com"},
-		Subject:     "Test Email",
-		Text:        "This is a test email.",
-		Attachments: []gomail.Attachment{{Filename: "test.txt", Content: []byte("This is a test attachment.")}},
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).AddAttachment(*gomail.NewAttachment("test.txt", []byte("This is a test attachment.")))
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -134,13 +150,12 @@ func TestSESEmailSender_SendEmailWithReplyTo(t *testing.T) {
 		sender:    "sender@example.com",
 	}
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-		ReplyTo: "replyto@example.com",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).SetReplyTo("replyto@example.com")
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
