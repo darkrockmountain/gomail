@@ -55,8 +55,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"html"
-	"io/ioutil"
 	"mime"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -490,7 +490,7 @@ func NewAttachment(filename string, content []byte) *Attachment {
 //	fmt.Println(attachment.GetFilename()) // Output: document.pdf
 //	fmt.Println(string(attachment.GetContent())) // Output: (file content)
 func NewAttachmentFromFile(filePath string) (*Attachment, error) {
-	content, err := ioutil.ReadFile(filePath)
+	content, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}
