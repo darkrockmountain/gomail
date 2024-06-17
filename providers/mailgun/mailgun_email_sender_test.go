@@ -1,4 +1,4 @@
-package providers
+package mailgun
 
 import (
 	"context"
@@ -9,6 +9,11 @@ import (
 	"github.com/mailgun/mailgun-go/v4"
 	"github.com/stretchr/testify/assert"
 )
+
+// TestEmailSenderImplementation checks if mailgunEmailSender implements the EmailSender interface
+func TestEmailSenderImplementation(t *testing.T) {
+	var _ gomail.EmailSender = (*mailgunEmailSender)(nil)
+}
 
 // Mock implementations for Mailgun
 type mockMailgun struct{}
@@ -45,22 +50,13 @@ func TestMailgunEmailSender_SendEmail(t *testing.T) {
 		mailgunClient: &mockMailgun{},
 	}
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-		HTML:    "<p>This is a test email.</p>",
-		CC:      []string{"cc@example.com"},
-		BCC:     []string{"bcc@example.com"},
-		ReplyTo: "replyto@example.com",
-		Attachments: []gomail.Attachment{
-			{
-				Filename: "test.txt",
-				Content:  []byte("This is a test attachment."),
-			},
-		},
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+		SetCC([]string{"cc@example.com"}).
+		SetBCC([]string{"bcc@example.com"}).
+		SetReplyTo("replyto@example.com").
+		SetHTML("<p>This is a test email.</p>").
+		SetBCC([]string{"bcc@example.com"}).
+		AddAttachment(*gomail.NewAttachment("test.txt", []byte("This is a test attachment.")))
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)
@@ -71,12 +67,7 @@ func TestMailgunEmailSender_SendEmailWithSendError(t *testing.T) {
 		mailgunClient: &mockMailgunWithError{},
 	}
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Email",
-		Text:    "This is a test email.",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.")
 
 	err := emailSender.SendEmail(message)
 	assert.Error(t, err)
@@ -88,12 +79,12 @@ func TestMailgunEmailSender_SendEmailWithEmptyFields(t *testing.T) {
 		mailgunClient: &mockMailgun{},
 	}
 
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{},
-		Subject: "",
-		Text:    "",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{},
+		"",
+		"",
+	)
 
 	err := emailSender.SendEmail(message)
 	assert.NoError(t, err)

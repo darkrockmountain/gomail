@@ -1,4 +1,4 @@
-package providers
+package microsoft365
 
 import (
 	"bytes"
@@ -20,6 +20,11 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 	"github.com/stretchr/testify/assert"
 )
+
+// TestEmailSenderImplementation checks if mSGraphEmailSender implements the EmailSender interface
+func TestEmailSenderImplementation(t *testing.T) {
+	var _ gomail.EmailSender = (*mSGraphEmailSender)(nil)
+}
 
 type MockMSAuthenticationProvider struct {
 }
@@ -77,18 +82,14 @@ func mockItemSendMailRequestBuild(err error) *users.UserItemRequestBuilder {
 }
 
 func TestSendEmail(t *testing.T) {
-	attachment := gomail.Attachment{
-		Filename: "test.txt",
-		Content:  []byte("test_attachment_content"),
-	}
+	attachment := *gomail.NewAttachment("test.txt", []byte("test_attachment_content"))
 
-	message := gomail.EmailMessage{
-		From:        "sender@example.com",
-		To:          []string{"recipient@example.com"},
-		Subject:     "Test Subject",
-		Text:        "Test Body",
-		Attachments: []gomail.Attachment{attachment},
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).AddAttachment(attachment)
 
 	reqBuild := mockItemSendMailRequestBuild(nil)
 	sender := &mSGraphEmailSender{
@@ -101,12 +102,12 @@ func TestSendEmail(t *testing.T) {
 }
 
 func TestComposeMessage_PlainTextEmail(t *testing.T) {
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Subject",
-		Text:    "Test Body",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	)
 
 	msMessage := composeMsMessage(message)
 
@@ -119,12 +120,7 @@ func TestComposeMessage_PlainTextEmail(t *testing.T) {
 }
 
 func TestComposeMessage_HTMLEmail(t *testing.T) {
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		Subject: "Test Subject",
-		HTML:    "<p>Test Body</p>",
-	}
+	message := gomail.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Subject", "<p>Test Body</p>")
 
 	msMessage := composeMsMessage(message)
 
@@ -135,13 +131,12 @@ func TestComposeMessage_HTMLEmail(t *testing.T) {
 }
 
 func TestComposeMessage_WithCC(t *testing.T) {
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		CC:      []string{"cc@example.com"},
-		Subject: "Test Subject",
-		Text:    "Test Body",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).SetCC([]string{"cc@example.com"})
 
 	msMessage := composeMsMessage(message)
 
@@ -150,13 +145,12 @@ func TestComposeMessage_WithCC(t *testing.T) {
 }
 
 func TestComposeMessage_WithBCC(t *testing.T) {
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		BCC:     []string{"bcc@example.com"},
-		Subject: "Test Subject",
-		Text:    "Test Body",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).SetBCC([]string{"bcc@example.com"})
 
 	msMessage := composeMsMessage(message)
 
@@ -165,13 +159,12 @@ func TestComposeMessage_WithBCC(t *testing.T) {
 }
 
 func TestComposeMessage_WithReplyTo(t *testing.T) {
-	message := gomail.EmailMessage{
-		From:    "sender@example.com",
-		To:      []string{"recipient@example.com"},
-		ReplyTo: "replyto@example.com",
-		Subject: "Test Subject",
-		Text:    "Test Body",
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).SetReplyTo("replyto@example.com")
 
 	msMessage := composeMsMessage(message)
 
@@ -181,18 +174,14 @@ func TestComposeMessage_WithReplyTo(t *testing.T) {
 
 func TestComposeMessage_WithAttachments(t *testing.T) {
 
-	attachment := gomail.Attachment{
-		Filename: "test.txt",
-		Content:  []byte("test_attachment_content"),
-	}
+	attachment := *gomail.NewAttachment("test.txt", []byte("test_attachment_content"))
 
-	message := gomail.EmailMessage{
-		From:        "sender@example.com",
-		To:          []string{"recipient@example.com"},
-		Subject:     "Test Subject",
-		Text:        "Test Body",
-		Attachments: []gomail.Attachment{attachment},
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).AddAttachment(attachment)
 
 	msMessage := composeMsMessage(message)
 
@@ -204,8 +193,7 @@ func TestComposeMessage_WithAttachments(t *testing.T) {
 }
 
 func TestComposeMessage_EmptyFields(t *testing.T) {
-	message := gomail.EmailMessage{}
-
+	message := gomail.NewEmailMessage("", []string{}, "", "")
 	msMessage := composeMsMessage(message)
 
 	assert.NotNil(t, msMessage)
@@ -265,18 +253,14 @@ func TestNewMSGraphEmailSenderROPC(t *testing.T) {
 ///////////////
 
 func TestSendEmail_NoUserRequestBuilder(t *testing.T) {
-	attachment := gomail.Attachment{
-		Filename: "test.txt",
-		Content:  []byte("test_attachment_content"),
-	}
+	attachment := *gomail.NewAttachment("test.txt", []byte("test_attachment_content"))
 
-	message := gomail.EmailMessage{
-		From:        "sender@example.com",
-		To:          []string{"recipient@example.com"},
-		Subject:     "Test Subject",
-		Text:        "Test Body",
-		Attachments: []gomail.Attachment{attachment},
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).AddAttachment(attachment)
 
 	sender := &mSGraphEmailSender{
 		userRequestBuilder: nil,
@@ -289,18 +273,14 @@ func TestSendEmail_NoUserRequestBuilder(t *testing.T) {
 
 func TestComposeMessage_LargeAttachment(t *testing.T) {
 	largeContent := make([]byte, 10*1024*1024) // 10 MB
-	attachment := gomail.Attachment{
-		Filename: "large.txt",
-		Content:  largeContent,
-	}
+	attachment := *gomail.NewAttachment("large.txt", largeContent)
 
-	message := gomail.EmailMessage{
-		From:        "sender@example.com",
-		To:          []string{"recipient@example.com"},
-		Subject:     "Test Subject",
-		Text:        "Test Body",
-		Attachments: []gomail.Attachment{attachment},
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).AddAttachment(attachment)
 
 	msMessage := composeMsMessage(message)
 
@@ -310,22 +290,15 @@ func TestComposeMessage_LargeAttachment(t *testing.T) {
 }
 
 func TestComposeMessage_MultipleAttachments(t *testing.T) {
-	attachment1 := gomail.Attachment{
-		Filename: "test1.txt",
-		Content:  []byte("test_attachment_content1"),
-	}
-	attachment2 := gomail.Attachment{
-		Filename: "test2.txt",
-		Content:  []byte("test_attachment_content2"),
-	}
+	attachment1 := *gomail.NewAttachment("test1.txt", []byte("test_attachment_content1"))
+	attachment2 := *gomail.NewAttachment("test2.txt", []byte("test_attachment_content2"))
 
-	message := gomail.EmailMessage{
-		From:        "sender@example.com",
-		To:          []string{"recipient@example.com"},
-		Subject:     "Test Subject",
-		Text:        "Test Body",
-		Attachments: []gomail.Attachment{attachment1, attachment2},
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).AddAttachment(attachment1).AddAttachment(attachment2)
 
 	msMessage := composeMsMessage(message)
 
@@ -337,10 +310,10 @@ func TestComposeMessage_MultipleAttachments(t *testing.T) {
 }
 
 func TestComposeMessage_MissingFields(t *testing.T) {
-	message := gomail.EmailMessage{
-		From: "sender@example.com",
-		To:   []string{"recipient@example.com"},
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"", "")
 
 	msMessage := composeMsMessage(message)
 
@@ -356,18 +329,14 @@ func TestComposeMessage_MissingFields(t *testing.T) {
 }
 
 func TestSendEmail_FailedSend(t *testing.T) {
-	attachment := gomail.Attachment{
-		Filename: "test.txt",
-		Content:  []byte("test_attachment_content"),
-	}
+	attachment := *gomail.NewAttachment("test.txt", []byte("test_attachment_content"))
 
-	message := gomail.EmailMessage{
-		From:        "sender@example.com",
-		To:          []string{"recipient@example.com"},
-		Subject:     "Test Subject",
-		Text:        "Test Body",
-		Attachments: []gomail.Attachment{attachment},
-	}
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).AddAttachment(attachment)
 
 	clientError := fmt.Errorf("mock error")
 	reqBuild := mockItemSendMailRequestBuild(clientError)

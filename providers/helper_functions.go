@@ -9,12 +9,12 @@ import (
 	"github.com/darkrockmountain/gomail"
 )
 
-// buildMimeMessage constructs the MIME message for the email, including text, HTML, and attachments.
+// BuildMimeMessage constructs the MIME message for the email, including text, HTML, and attachments.
 // This function builds a multipart MIME message based on the provided email message. It supports plain text,
 // HTML content, and multiple attachments.
 //
 // Parameters:
-// - message: An EmailMessage struct containing the details of the email to be sent.
+// - message: A pointer to an EmailMessage struct containing the details of the email to be sent.
 //
 // Returns:
 // - []byte: A byte slice containing the complete MIME message.
@@ -22,25 +22,21 @@ import (
 //
 // Example:
 //
-//	message := EmailMessage{
-//	    From:    "sender@example.com",
-//	    To:      ["recipient@example.com"],
-//	    Subject: "Test Email",
-//	    Text:    "This is a test email.",
-//	    HTML:    "<p>This is a test email.</p>",
-//	    Attachments: []Attachment{
-//	        {
-//	            Filename: "test.txt",
-//	            Content:  []byte("This is a test attachment."),
-//	        },
-//	    },
-//	}
-//	mimeMessage, err := buildMimeMessage(message)
+//	message := gomail.NewEmailMessage(
+//		"sender@example.com",
+//		[]string["recipient@example.com"],
+//		"Test Email",
+//		"This is a test email.",)
+//		.SetHtml("<p>This is a test email.</p>").AddAttachment(Attachment{
+//		Filename: "test.txt",
+//		Content:  []byte("This is a test attachment."),
+//	})
+//	mimeMessage, err := BuildMimeMessage(message)
 //	if err != nil {
 //	    log.Fatalf("Failed to build MIME message: %v", err)
 //	}
 //	fmt.Println(string(mimeMessage))
-func buildMimeMessage(message gomail.EmailMessage) ([]byte, error) {
+func BuildMimeMessage(message *gomail.EmailMessage) ([]byte, error) {
 	var msg bytes.Buffer
 
 	// Determine boundaries
@@ -127,7 +123,7 @@ func buildMimeMessage(message gomail.EmailMessage) ([]byte, error) {
 	return msg.Bytes(), nil
 }
 
-// strPtr takes a string value and returns a pointer to that string.
+// StrPtr takes a string value and returns a pointer to that string.
 // This function is useful when you need to work with string pointers, such as in
 // scenarios where you need to pass a string by reference or handle optional string fields.
 //
@@ -140,12 +136,12 @@ func buildMimeMessage(message gomail.EmailMessage) ([]byte, error) {
 // Example usage:
 //
 //	name := "John Doe"
-//	namePtr := strPtr(name)
+//	namePtr := StrPtr(name)
 //	fmt.Println(namePtr)  // Output: memory address of the string
 //	fmt.Println(*namePtr) // Output: "John Doe"
 //
 // Detailed explanation:
-// The strPtr function creates a pointer to the given string `str`.
+// The StrPtr function creates a pointer to the given string `str`.
 // This can be particularly useful in the following scenarios:
 //  1. Passing strings by reference to functions, which can help avoid copying large strings.
 //  2. Working with data structures that use pointers to represent optional fields or nullable strings.
@@ -153,6 +149,6 @@ func buildMimeMessage(message gomail.EmailMessage) ([]byte, error) {
 //
 // By using this function, you can easily obtain a pointer to a string and utilize it in contexts
 // where pointers are needed, thus enhancing flexibility and efficiency in your Go programs.
-func strPtr(str string) *string {
+func StrPtr(str string) *string {
 	return &str
 }

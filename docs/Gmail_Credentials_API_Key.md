@@ -31,7 +31,7 @@ apiKey := "your-api-key"
 user := "me"
 
 // Initialize the GmailEmailSender
-emailSender, err := providers.NewGmailEmailSenderAPIKey(apiKey, user)
+emailSender, err := gmail.NewGmailEmailSenderAPIKey(apiKey, user)
 if err != nil {
     log.Fatalf("Failed to create GmailEmailSender: %v", err)
 }
@@ -43,14 +43,10 @@ if err != nil {
 }
 
 // Define email message using an alias email address
-message := gomail.EmailMessage{
-    From:        "your-email_or_alias@example.com",
-    To:          []string{"recipient@example.com"},
-    Subject:     "Test Email with Alias",
-    Text:        "This is the plain text part of the email.",
-    HTML:        "<p>This is the <b>HTML</b> part of the <i>email</i>.</p>",
-    Attachments: []gomail.Attachment{{Filename: "attachment.jpg", Content: attachmentContent}},
-}
+message := gomail.NewEmailMessage("your-email_or_alias@example.com",[]string{"recipient@example.com"}, "Test Email with attachment", "This is the plain text part of the email.").
+		SetHTML("<p>This is the <b>HTML</b> part of the <i>email</i>.</p>").AddAttachments(*gomail.NewAttachment("attachment.jpg", attachmentContent))
+
+
 
 // Send email
 if err := emailSender.SendEmail(message); err != nil {

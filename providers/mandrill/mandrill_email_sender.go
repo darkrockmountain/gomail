@@ -1,5 +1,5 @@
 // mandrill_email_sender.go
-package providers
+package mandrill
 
 import (
 	"bytes"
@@ -15,6 +15,7 @@ import (
 const (
 	mandrillRequestMethod = "POST"
 	mandrillRequestURL    = "https://mandrillapp.com/api/1.0/messages/send.json"
+	clientTimeOut         = time.Millisecond * 100
 )
 
 // mandrillEmailSender defines a struct for sending emails using the Mandrill API.
@@ -42,11 +43,11 @@ func NewMandrillEmailSender(apiKey string) (*mandrillEmailSender, error) {
 // It constructs the email message from the given EmailMessage and sends it using the Mandrill API.
 //
 // Parameters:
-//   - message: An EmailMessage struct that contains the details of the email to be sent, including the sender, recipients, subject, body content, and any attachments.
+//   - message: A pointer to an EmailMessage struct that contains the details of the email to be sent, including the sender, recipients, subject, body content, and any attachments.
 //
 // Returns:
 //   - error: An error if the email sending fails, otherwise nil.
-func (s *mandrillEmailSender) SendEmail(message gomail.EmailMessage) error {
+func (s *mandrillEmailSender) SendEmail(message *gomail.EmailMessage) error {
 	maMessage := mandrillMessage{
 		FromEmail: message.GetFrom(),
 		To:        make([]mandrillRecipient, 0),
@@ -117,7 +118,7 @@ func (s *mandrillEmailSender) SendEmail(message gomail.EmailMessage) error {
 
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: time.Second * 10}
+	client := &http.Client{Timeout: clientTimeOut}
 	resp, err := client.Do(req)
 	if err != nil {
 		return errors.Wrap(err, "failed to send email via Mandrill API")

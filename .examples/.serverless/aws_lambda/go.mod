@@ -1,6 +1,6 @@
 module github.com/darkrockmountain/gomail/aws_lambda_email_sender
 
-go 1.22.1
+go 1.22.4
 
 require (
 	github.com/aws/aws-lambda-go v1.47.0
