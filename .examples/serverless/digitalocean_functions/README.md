@@ -27,7 +27,7 @@ This example demonstrates how to use the `EmailSender` interface in a DigitalOce
 
 3. **Set Up Environment Variables**:
 
-    Set up the following environment variables in your DigitalOcean App Platform (or in the .env file):
+    Set up the following environment variables in your DigitalOcean App Platform, or create an .env file at the root of this folder:
     _For the example should be:_ 
     - `SMTP_HOST`
     - `SMTP_PORT`
