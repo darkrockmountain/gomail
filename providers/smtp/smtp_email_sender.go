@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/darkrockmountain/gomail"
-	"github.com/darkrockmountain/gomail/providers"
 )
 
 // smtpEmailSender is responsible for sending emails using SMTP.
@@ -87,7 +86,7 @@ func (s *smtpEmailSender) SendEmail(message *gomail.EmailMessage) error {
 	sendMailTo := message.GetTo()
 	sendMailTo = append(sendMailTo, message.GetCC()...)
 	sendMailTo = append(sendMailTo, message.GetBCC()...)
-	msg, err := providers.BuildMimeMessage(message)
+	msg, err := gomail.BuildMimeMessage(message)
 	if err != nil {
 		return err
 	}
