@@ -57,7 +57,7 @@ func handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 
 	// Send the email using the initialized sender.
-	if err := sender.SendEmail(emailReq); err != nil {
+	if err := sender.SendEmail(&emailReq); err != nil {
 		fmt.Printf("Error sending email %v, with error %v\n", emailReq, err)
 		return events.APIGatewayProxyResponse{
 			Body:       "Failed to send email",

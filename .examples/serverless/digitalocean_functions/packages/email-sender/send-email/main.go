@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -10,6 +12,8 @@ import (
 	"github.com/darkrockmountain/gomail"
 	"github.com/darkrockmountain/gomail/providers/smtp"
 )
+
+const errorOutputMessage = "An unexpected error occurred. Please try again later."
 
 type ResponseHeaders struct {
 	ContentType string `json:"Content-Type"`
@@ -29,13 +33,23 @@ func generateResponse(code int, body string) Response {
 	}
 }
 
-func Main(ctx context.Context, emailReq gomail.EmailMessage) Response {
+func Main(ctx context.Context, jsonData []byte) Response {
+
+	var emailMessage gomail.EmailMessage
+
+	err := json.Unmarshal(jsonData, &emailMessage)
+	if err != nil {
+		log.Printf("error unmarshaling from JSON: %v", err)
+		return generateResponse(http.StatusInternalServerError, errorOutputMessage)
+
+	}
 
 	host := os.Getenv("SMTP_HOST")
 	portStr := os.Getenv("SMTP_PORT")
 	port, err := strconv.Atoi(portStr)
 	if err != nil {
-		return generateResponse(http.StatusInternalServerError, "Invalid port number")
+		log.Printf("error invalid port number: %v", err)
+		return generateResponse(http.StatusInternalServerError, errorOutputMessage)
 	}
 	user := os.Getenv("SMTP_USER")
 	password := os.Getenv("SMTP_PASSWORD")
@@ -43,11 +57,13 @@ func Main(ctx context.Context, emailReq gomail.EmailMessage) Response {
 
 	sender, err := smtp.NewSmtpEmailSender(host, port, user, password, authMethod)
 	if err != nil {
-		return generateResponse(http.StatusInternalServerError, "Failed to initialize email sender")
+		log.Printf("error failed to initialize email sender %v", err)
+		return generateResponse(http.StatusInternalServerError, errorOutputMessage)
 
 	}
 
-	if err := sender.SendEmail(emailReq); err != nil {
+	if err := sender.SendEmail(&emailMessage); err != nil {
+		log.Printf("error sending email %v", err)
 		return generateResponse(http.StatusInternalServerError, "Failed to send email")
 	}
 

@@ -1,0 +1,11 @@
+packages:
+  - name: email-sender
+    functions:
+      - name: send-email
+        runtime: 'go:1.20'
+        environment:
+          SMTP_HOST: "${SMTP_HOST}"
+          SMTP_PORT: "${SMTP_PORT}"
+          SMTP_USER: "${SMTP_USER}"
+          SMTP_PASSWORD: "${SMTP_PASSWORD}"
+          SMTP_AUTH_METHOD: "${SMTP_AUTH_METHOD}"

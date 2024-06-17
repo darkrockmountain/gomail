@@ -48,7 +48,7 @@ func SendEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Send the email using the initialized sender.
-	if err := sender.SendEmail(emailReq); err != nil {
+	if err := sender.SendEmail(&emailReq); err != nil {
 		http.Error(w, "Failed to send email", http.StatusInternalServerError)
 		return
 	}
