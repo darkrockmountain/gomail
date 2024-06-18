@@ -71,4 +71,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-retract [v0.0.0, v0.5.1] // Retract versions up to v0.5.1 due to migration from GitLab to GitHub. Previous versions will not be maintained.
+retract [v0.0.0, v0.5.9] // Retract versions up to v0.5.x due to migration from GitLab to GitHub. Previous versions will not be maintained.
