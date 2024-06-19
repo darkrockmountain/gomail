@@ -736,29 +736,60 @@ func TestBuildMimeMessage(t *testing.T) {
 	}
 }
 
+func TestEmailMessageDefaultSanitizersEdgeCases(t *testing.T) {
+	email := &EmailMessage{}
+
+	t.Run("SetSubject with default sanitizer", func(t *testing.T) {
+		subjectInjected := `<Subject> & "attack"`
+		expected := `&lt;Subject&gt; &amp; &#34;attack&#34;`
+		email.SetSubject(subjectInjected)
+		assert.Equal(t, subjectInjected, email.subject)
+		result := email.GetSubject()
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("SetText with default sanitizer", func(t *testing.T) {
+		testInjected := `Hello <world> & "everyone"`
+		expected := `Hello &lt;world&gt; &amp; &#34;everyone&#34;`
+		email.SetText(testInjected)
+		assert.Equal(t, testInjected, email.text)
+		result := email.GetText()
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("SetHTML with default sanitizer", func(t *testing.T) {
+		htmlInjected := `<div><a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">XSS<a></div>`
+		expected := `<div>XSS</div>`
+		email.SetHTML(htmlInjected)
+		assert.Equal(t, htmlInjected, email.html)
+		result := email.GetHTML()
+		assert.Equal(t, expected, result)
+	})
+}
+
 func TestEmailMessageCustomSanitizers(t *testing.T) {
 	message := &EmailMessage{
-		subject: "Custom Subject",
-		text:    "Custom Text",
-		html:    "<p>Custom HTML</p>",
+		subject: `<Subject> & "attack"`,
+		text:    `Hello <world> & "everyone"`,
+		html:    `<div><a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">XSS<a></div>`,
 	}
 
 	customSanitizer := sanitizer.NonSanitizer()
 
 	t.Run("SetCustomTextSanitizer", func(t *testing.T) {
 		message.SetCustomTextSanitizer(customSanitizer)
-		expected := "Custom Subject"
+		expected := `<Subject> & "attack"`
 		result := message.GetSubject()
 		assert.Equal(t, expected, result)
 
-		expected = "Custom Text"
+		expected = `Hello <world> & "everyone"`
 		result = message.GetText()
 		assert.Equal(t, expected, result)
 	})
 
 	t.Run("SetCustomHtmlSanitizer", func(t *testing.T) {
 		message.SetCustomHtmlSanitizer(customSanitizer)
-		expected := "<p>Custom HTML</p>"
+		expected := `<div><a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">XSS<a></div>`
 		result := message.GetHTML()
 		assert.Equal(t, expected, result)
 	})
@@ -770,7 +801,7 @@ func TestEmailMessageSettersAndSanitizersEdgeCases(t *testing.T) {
 	t.Run("SetSubject with custom sanitizer", func(t *testing.T) {
 		customSanitizer := sanitizer.NonSanitizer()
 		email.SetCustomTextSanitizer(customSanitizer)
-		expected := "Subject"
+		expected := `<Subject> & "attack"`
 		email.SetSubject(expected)
 		assert.Equal(t, expected, email.subject)
 		result := email.GetSubject()
@@ -780,7 +811,7 @@ func TestEmailMessageSettersAndSanitizersEdgeCases(t *testing.T) {
 	t.Run("SetText with custom sanitizer", func(t *testing.T) {
 		customSanitizer := sanitizer.NonSanitizer()
 		email.SetCustomTextSanitizer(customSanitizer)
-		expected := "Text body"
+		expected := `Hello <world> & "everyone"`
 		email.SetText(expected)
 		assert.Equal(t, expected, email.text)
 		result := email.GetText()
@@ -790,7 +821,7 @@ func TestEmailMessageSettersAndSanitizersEdgeCases(t *testing.T) {
 	t.Run("SetHTML with custom sanitizer", func(t *testing.T) {
 		customSanitizer := sanitizer.NonSanitizer()
 		email.SetCustomHtmlSanitizer(customSanitizer)
-		expected := "<p>HTML body</p>"
+		expected := `<div><a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">XSS<a></div>`
 		email.SetHTML(expected)
 		assert.Equal(t, expected, email.html)
 		result := email.GetHTML()
