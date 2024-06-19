@@ -55,19 +55,6 @@ func TestNewFullEmailMessage(t *testing.T) {
 	assert.Equal(t, attachments, emailMessage.GetAttachments())
 }
 
-func TestBuildMimeMessage(t *testing.T) {
-	from := "sender@example.com"
-	to := []string{"recipient@example.com"}
-	subject := "Test Subject"
-	body := "This is a test email body."
-
-	emailMessage := NewEmailMessage(from, to, subject, body)
-	mimeMessage, err := BuildMimeMessage(emailMessage)
-
-	assert.NoError(t, err)
-	assert.NotEmpty(t, mimeMessage)
-}
-
 func TestNewAttachment(t *testing.T) {
 	filename := "test.txt"
 	content := []byte("test content")
@@ -88,6 +75,19 @@ func TestNewAttachmentFromFile(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "testfile.txt", attachment.GetFilename())
 	assert.Equal(t, content, attachment.GetRawContent())
+}
+
+func TestBuildMimeMessage(t *testing.T) {
+	from := "sender@example.com"
+	to := []string{"recipient@example.com"}
+	subject := "Test Subject"
+	body := "This is a test email body."
+
+	emailMessage := NewEmailMessage(from, to, subject, body)
+	mimeMessage, err := BuildMimeMessage(emailMessage)
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, mimeMessage)
 }
 
 func TestValidateEmail(t *testing.T) {

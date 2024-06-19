@@ -85,18 +85,6 @@ func NewEmailMessage(from string, to []string, subject string, body string) *com
 	return common.NewEmailMessage(from, to, subject, body)
 }
 
-// BuildMimeMessage constructs the MIME message for the email, including text, HTML, and attachments.
-// This function builds a multipart MIME message based on the provided email message. It supports plain text,
-// HTML content, and multiple attachments.
-// Parameters:
-// - message: A pointer to an EmailMessage struct containing the details of the email to be sent.
-// Returns:
-// - []byte: A byte slice containing the complete MIME message.
-// - error: An error if constructing the MIME message fails, otherwise nil.
-func BuildMimeMessage(message *common.EmailMessage) ([]byte, error) {
-	return common.BuildMimeMessage(message)
-}
-
 // NewFullEmailMessage creates a new EmailMessage with all fields.
 // Parameters:
 // - from: The sender email address.
@@ -134,6 +122,18 @@ func NewAttachment(filename string, content []byte) *common.Attachment {
 //   - error: An error if reading the file fails, otherwise nil.
 func NewAttachmentFromFile(filePath string) (*common.Attachment, error) {
 	return common.NewAttachmentFromFile(filePath)
+}
+
+// BuildMimeMessage constructs the MIME message for the email, including text, HTML, and attachments.
+// This function builds a multipart MIME message based on the provided email message. It supports plain text,
+// HTML content, and multiple attachments.
+// Parameters:
+// - message: A pointer to an EmailMessage struct containing the details of the email to be sent.
+// Returns:
+// - []byte: A byte slice containing the complete MIME message.
+// - error: An error if constructing the MIME message fails, otherwise nil.
+func BuildMimeMessage(message *common.EmailMessage) ([]byte, error) {
+	return common.BuildMimeMessage(message)
 }
 
 // ValidateEmail validates and sanitizes an email address.
