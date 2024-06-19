@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/darkrockmountain/gomail/sanitizer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -716,6 +717,149 @@ func TestBuildMimeMessage(t *testing.T) {
 				SetBCC([]string{"bcc@example.com"}).
 				SetReplyTo("reply-to@example.com"),
 			[]string{"From: sender@example.com", "To: recipient@example.com", "Cc: cc@example.com", "Subject: Test Email", "This is a test email.", "Reply-To: reply-to@example.com"},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.message.GetSubject(), func(t *testing.T) {
+			result, err := BuildMimeMessage(test.message)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			for _, substring := range test.contains {
+				if !bytes.Contains(result, []byte(substring)) {
+					t.Fatalf("expected result to contain '%s'", substring)
+				}
+			}
+		})
+	}
+}
+
+func TestEmailMessageCustomSanitizers(t *testing.T) {
+	message := &EmailMessage{
+		subject: "Custom Subject",
+		text:    "Custom Text",
+		html:    "<p>Custom HTML</p>",
+	}
+
+	customSanitizer := sanitizer.NonSanitizer()
+
+	t.Run("SetCustomTextSanitizer", func(t *testing.T) {
+		message.SetCustomTextSanitizer(customSanitizer)
+		expected := "Custom Subject"
+		result := message.GetSubject()
+		assert.Equal(t, expected, result)
+
+		expected = "Custom Text"
+		result = message.GetText()
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("SetCustomHtmlSanitizer", func(t *testing.T) {
+		message.SetCustomHtmlSanitizer(customSanitizer)
+		expected := "<p>Custom HTML</p>"
+		result := message.GetHTML()
+		assert.Equal(t, expected, result)
+	})
+}
+
+func TestEmailMessageSettersAndSanitizersEdgeCases(t *testing.T) {
+	email := &EmailMessage{}
+
+	t.Run("SetSubject with custom sanitizer", func(t *testing.T) {
+		customSanitizer := sanitizer.NonSanitizer()
+		email.SetCustomTextSanitizer(customSanitizer)
+		expected := "Subject"
+		email.SetSubject(expected)
+		assert.Equal(t, expected, email.subject)
+		result := email.GetSubject()
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("SetText with custom sanitizer", func(t *testing.T) {
+		customSanitizer := sanitizer.NonSanitizer()
+		email.SetCustomTextSanitizer(customSanitizer)
+		expected := "Text body"
+		email.SetText(expected)
+		assert.Equal(t, expected, email.text)
+		result := email.GetText()
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("SetHTML with custom sanitizer", func(t *testing.T) {
+		customSanitizer := sanitizer.NonSanitizer()
+		email.SetCustomHtmlSanitizer(customSanitizer)
+		expected := "<p>HTML body</p>"
+		email.SetHTML(expected)
+		assert.Equal(t, expected, email.html)
+		result := email.GetHTML()
+		assert.Equal(t, expected, result)
+	})
+}
+
+func TestGetAttachmentsWithEdgeCases(t *testing.T) {
+	t.Run("GetAttachments with mixed size attachments", func(t *testing.T) {
+		email := &EmailMessage{
+			attachments: []Attachment{
+				{filename: "small.txt", content: []byte("small content")},
+				{filename: "large.txt", content: make([]byte, 30*1024*1024)}, // 30 MB
+			},
+			maxAttachmentSize: 25 * 1024 * 1024, // 25 MB
+		}
+
+		expected := []Attachment{
+			{filename: "small.txt", content: []byte("small content")},
+		}
+		result := email.GetAttachments()
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("GetAttachments with no size limit", func(t *testing.T) {
+		email := &EmailMessage{
+			attachments: []Attachment{
+				{filename: "small.txt", content: []byte("small content")},
+				{filename: "large.txt", content: make([]byte, 30*1024*1024)}, // 30 MB
+			},
+			maxAttachmentSize: -1, // No size limit
+		}
+
+		expected := email.attachments
+		result := email.GetAttachments()
+		assert.Equal(t, expected, result)
+	})
+}
+
+func TestBuildMimeMessageWithSanitizers(t *testing.T) {
+	tests := []struct {
+		message  *EmailMessage
+		contains []string
+	}{
+		{
+			NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email."),
+			[]string{"From: sender@example.com", "To: recipient@example.com", "Subject: Test Email", "This is a test email."},
+		},
+		{
+			NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "<p>This is a test email.</p>"),
+			[]string{"From: sender@example.com", "To: recipient@example.com", "Subject: Test Email", "Content-Type: text/html", "<p>This is a test email.</p>"},
+		},
+		{
+			NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+				SetCC([]string{"cc@example.com"}).
+				SetBCC([]string{"bcc@example.com"}).
+				SetAttachments([]Attachment{*NewAttachment("test.txt", []byte("This is a test attachment."))}),
+			[]string{"From: sender@example.com", "To: recipient@example.com", "Cc: cc@example.com", "Subject: Test Email", "This is a test email.", "Content-Disposition: attachment; filename=\"test.txt\"", base64.StdEncoding.EncodeToString([]byte("This is a test attachment."))},
+		},
+		{
+			NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Test Email", "This is a test email.").
+				SetCC([]string{"cc@example.com"}).
+				SetBCC([]string{"bcc@example.com"}).
+				SetReplyTo("reply-to@example.com"),
+			[]string{"From: sender@example.com", "To: recipient@example.com", "Cc: cc@example.com", "Subject: Test Email", "This is a test email.", "Reply-To: reply-to@example.com"},
+		},
+		{
+			NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "<script>alert('xss')</script>", "This is a test email."),
+			[]string{"Subject: &lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;"},
 		},
 	}
 

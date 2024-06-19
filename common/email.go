@@ -6,25 +6,30 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/darkrockmountain/gomail/sanitizer"
 )
 
 const DefaultMaxAttachmentSize = 25 * 1024 * 1024 // 25 MB
 
 // EmailMessage contains the fields for sending an email.
 // Use this struct to specify the sender, recipient, subject, and content of the email,
-// as well as any attachments.
+// as well as any attachments. This struct also supports custom sanitizers for text
+// and HTML content to ensure that email content is safe and sanitized according to
+// specific requirements.
 type EmailMessage struct {
-	from              string       // Sender email address.
-	to                []string     // Recipient email addresses.
-	cc                []string     // CC recipients email addresses.
-	bcc               []string     // BCC recipients email addresses.
-	replyTo           string       // Reply-To email address.
-	subject           string       // Email subject.
-	text              string       // Plain text content of the email.
-	html              string       // HTML content of the email (optional).
-	attachments       []Attachment // Attachments to be included in the email (optional).
-	maxAttachmentSize int          // Maximum size for attachments.
-
+	from              string              // Sender email address.
+	to                []string            // Recipient email addresses.
+	cc                []string            // CC recipients email addresses.
+	bcc               []string            // BCC recipients email addresses.
+	replyTo           string              // Reply-To email address.
+	subject           string              // Email subject.
+	text              string              // Plain text content of the email.
+	html              string              // HTML content of the email (optional).
+	attachments       []Attachment        // Attachments to be included in the email (optional).
+	maxAttachmentSize int                 // Maximum size for attachments.
+	textSanitizer     sanitizer.Sanitizer // Sanitizer for plain text content.
+	htmlSanitizer     sanitizer.Sanitizer // Sanitizer for HTML content.
 }
 
 // NewEmailMessage creates a new EmailMessage with the required fields.
@@ -274,42 +279,47 @@ func (e *EmailMessage) GetReplyTo() string {
 }
 
 // GetSubject returns the sanitized email subject.
-// It escapes special characters like "<" to become "&lt;"
+// It uses the custom text sanitizer if set, otherwise the default text sanitizer to escape special characters and trim whitespace.
 // If the EmailMessage is nil, it returns an empty string.
 //
 // Returns:
-//   - string: The email subject.
+// - string: The sanitized email subject.
 func (e *EmailMessage) GetSubject() string {
 	if e == nil {
 		return ""
 	}
-	return sanitizeInput(e.subject)
+	if e.textSanitizer != nil {
+		return e.textSanitizer.Sanitize(e.subject)
+	}
+	return sanitizer.DefaultTextSanitizer().Sanitize(e.subject)
 }
 
 // GetText returns the sanitized plain text content of the email.
-// It escapes special characters like "<" to become "&lt;"
-// If the EmailMessage is nil, it returns an empty string.
-//
+// It uses the custom text sanitizer if set, otherwise the default sanitizer.
 // Returns:
-//   - string: The plain text content of the email.
+// - string: The sanitized plain text content of the email.
 func (e *EmailMessage) GetText() string {
 	if e == nil {
 		return ""
 	}
-	return sanitizeInput(e.text)
+	if e.textSanitizer != nil {
+		return e.textSanitizer.Sanitize(e.text)
+	}
+	return sanitizer.DefaultTextSanitizer().Sanitize(e.text)
 }
 
-// GetHTML returns the sanitized HTML with only the UGC
-// content of the email.
-// If the EmailMessage is nil, it returns an empty string.
-//
+// GetHTML returns the sanitized HTML content of the email.
+// It uses the custom html sanitizer if set, otherwise the default sanitizer.
 // Returns:
-//   - string: The HTML sanitized content of the email.
+// - string: The sanitized HTML content of the email.
 func (e *EmailMessage) GetHTML() string {
 	if e == nil {
 		return ""
 	}
-	return sanitizeHtmlInput(e.html)
+	if e.htmlSanitizer != nil {
+		return e.htmlSanitizer.Sanitize(e.html)
+	}
+	return sanitizer.DefaultHtmlSanitizer().Sanitize(e.html)
 }
 
 // SetMaxAttachmentSize sets the maximum attachment size.
@@ -344,6 +354,36 @@ func (e *EmailMessage) GetAttachments() []Attachment {
 		}
 	}
 	return validAttachments
+}
+
+// SetCustomTextSanitizer sets a custom sanitizer for text content.
+// WARNING: Using a custom text sanitizer may introduce security risks
+// if the sanitizer does not properly handle potentially dangerous content.
+// Ensure that the custom sanitizer is thoroughly tested and used with caution.
+//
+// Parameters:
+// - s: The custom Sanitizer implementation for text content.
+//
+// Returns:
+// - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) SetCustomTextSanitizer(s sanitizer.Sanitizer) *EmailMessage {
+	e.textSanitizer = s
+	return e
+}
+
+// SetCustomHtmlSanitizer sets a custom sanitizer for HTML content.
+// WARNING: Using a custom HTML sanitizer may introduce security risks
+// if the sanitizer does not properly handle potentially dangerous content.
+// Ensure that the custom sanitizer is thoroughly tested and used with caution.
+//
+// Parameters:
+// - s: The custom Sanitizer implementation for HTML content.
+//
+// Returns:
+// - *EmailMessage: The EmailMessage struct pointer.
+func (e *EmailMessage) SetCustomHtmlSanitizer(s sanitizer.Sanitizer) *EmailMessage {
+	e.htmlSanitizer = s
+	return e
 }
 
 // jsonEmailMessage represents the JSON structure for an email message.

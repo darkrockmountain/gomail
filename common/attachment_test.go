@@ -220,18 +220,20 @@ func TestSetContent(t *testing.T) {
 	})
 }
 
-func TestSanitizeInput(t *testing.T) {
-	t.Run("sanitize input with HTML", func(t *testing.T) {
-		input := "<div>Test</div>"
+func TestSanitizeFilename(t *testing.T) {
+
+	attachment := &Attachment{}
+	t.Run("sanitize Filename with HTML", func(t *testing.T) {
+		fileName := "<div>Test</div>"
 		expected := "&lt;div&gt;Test&lt;/div&gt;"
-		result := sanitizeInput(input)
-		assert.Equal(t, expected, result)
+		attachment.SetFilename(fileName)
+		assert.Equal(t, expected, attachment.GetFilename())
 	})
 
-	t.Run("sanitize input with spaces", func(t *testing.T) {
-		input := "  Test  "
+	t.Run("sanitize Filename with spaces", func(t *testing.T) {
+		fileName := "  Test  "
 		expected := "Test"
-		result := sanitizeInput(input)
-		assert.Equal(t, expected, result)
+		attachment.SetFilename(fileName)
+		assert.Equal(t, expected, attachment.GetFilename())
 	})
 }

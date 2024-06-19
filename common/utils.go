@@ -1,24 +1,11 @@
 package common
 
 import (
-	"html"
 	"mime"
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"github.com/microcosm-cc/bluemonday"
 )
-
-// sanitizeInput sanitizes a string to prevent HTML and script injection.
-func sanitizeInput(input string) string {
-	return html.EscapeString(strings.TrimSpace(input))
-}
-
-// sanitizeHtmlInput sanitizes a string to prevent HTML and script injection but conserving the safe html tags.
-func sanitizeHtmlInput(input string) string {
-	return bluemonday.UGCPolicy().Sanitize(input)
-}
 
 // IsHTML checks if a string contains HTML tags.
 // Parameters:
