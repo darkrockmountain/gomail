@@ -6,60 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEmailHTMLBodySanitzers(t *testing.T) {
-
-	html1 := `<div><a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">XSS<a></div>`
-
-	t.Run("remove potential XSS attack", func(t *testing.T) {
-		expected := `<div>XSS</div>`
-		result := sanitizeHtmlInput(html1)
-		assert.Equal(t, expected, result)
-	})
-
-	html2 := `<a onblur="alert(secret)" href="http://www.google.com">Google</a>`
-
-	t.Run("on methods not allowed", func(t *testing.T) {
-		expected := `<a href="http://www.google.com" rel="nofollow">Google</a>`
-		result := sanitizeHtmlInput(html2)
-		assert.Equal(t, expected, result)
-	})
-
-	html3 := `<p href="http://www.google.com">Google</p>`
-
-	t.Run("<p> can't have href", func(t *testing.T) {
-		expected := `<p>Google</p>`
-		result := sanitizeHtmlInput(html3)
-		assert.Equal(t, expected, result)
-	})
-
-}
-
-func TestEmailHTMLBodySanitizers(t *testing.T) {
-	html1 := `<div><a href="javascript:alert('XSS1')" onmouseover="alert('XSS2')">XSS<a></div>`
-
-	t.Run("remove potential XSS attack", func(t *testing.T) {
-		expected := `<div>XSS</div>`
-		result := sanitizeHtmlInput(html1)
-		assert.Equal(t, expected, result)
-	})
-
-	html2 := `<a onblur="alert(secret)" href="http://www.google.com">Google</a>`
-
-	t.Run("on methods not allowed", func(t *testing.T) {
-		expected := `<a href="http://www.google.com" rel="nofollow">Google</a>`
-		result := sanitizeHtmlInput(html2)
-		assert.Equal(t, expected, result)
-	})
-
-	html3 := `<p href="http://www.google.com">Google</p>`
-
-	t.Run("<p> can't have href", func(t *testing.T) {
-		expected := `<p>Google</p>`
-		result := sanitizeHtmlInput(html3)
-		assert.Equal(t, expected, result)
-	})
-}
-
 func TestStrPtr(t *testing.T) {
 
 	str := "String to test for pointer"

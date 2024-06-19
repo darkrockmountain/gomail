@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"os"
 	"strings"
+
+	"github.com/darkrockmountain/gomail/sanitizer"
 )
 
 // Attachment represents an email attachment with its filename and content.
@@ -76,16 +78,16 @@ func (a *Attachment) SetFilename(filename string) {
 }
 
 // GetFilename safely returns the filename of the attachment.
-// It escapes special characters like "<" to become "&lt;"
+// It uses the default text sanitizer to escape special characters and trim whitespace.
 // If the attachment is nil, it returns an empty string.
+//
 // Returns:
-//   - string: The filename as a string.
-//     Returns an "nil_attachment" string if the attachment is nil.
+// - string: The sanitized filename.
 func (a *Attachment) GetFilename() string {
 	if a == nil {
 		return "nil_attachment"
 	}
-	return sanitizeInput(a.filename)
+	return sanitizer.DefaultTextSanitizer().Sanitize(a.filename)
 }
 
 // GetBase64StringContent returns the content of the attachment as a base64-encoded string.
