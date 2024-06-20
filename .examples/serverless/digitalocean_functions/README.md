@@ -7,9 +7,17 @@ This example demonstrates how to use the `EmailSender` interface in a DigitalOce
 - `do_email_sender.go`: The main Go code for the function.
 - `go.mod`: Go modules file for dependency management.
 - `Makefile`: Makefile to build and deploy the function.
-- `app.yaml`: DigitalOcean App Platform configuration file.
+- `project.yml`: DigitalOcean Project configuration file.
 - `Dockerfile`: Dockerfile to containerize the Go application.
 - `README.md`: This documentation file.
+
+## Prerequisites
+
+Before you begin, ensure you have met the following requirements:
+
+- Node.js and npm are installed.
+- Go is installed and configured.
+- DigitalOcean CLI (for deployment to DigitalOcean).
 
 ## Deployment
 
