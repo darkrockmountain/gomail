@@ -24,7 +24,16 @@ func (s *defaultHtmlSanitizer) Sanitize(htmlContent string) string {
 var defaultHtmlSanitizerInstance = &defaultHtmlSanitizer{}
 
 // DefaultHtmlSanitizer returns the singleton instance of defaultHtmlSanitizer.
-// This ensures that the instance cannot be modified from outside the package.
+//
+// defaultHtmlSanitizer provides a basic implementation of the Sanitizer interface for HTML content.
+// It uses the bluemonday library to sanitize HTML content, ensuring that only user-generated content
+// (UGC) is allowed. This helps prevent injection attacks by removing potentially dangerous tags and attributes.
+//
+// Example usage:
+//
+//	hs := sanitizer.DefaultHtmlSanitizer()
+//	sanitized := hs.Sanitize("<script>alert('xss')</script><b>Bold</b>")
+//	// sanitized will be "<b>Bold</b>"
 func DefaultHtmlSanitizer() Sanitizer {
 	return defaultHtmlSanitizerInstance
 }

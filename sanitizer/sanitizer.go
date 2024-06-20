@@ -16,13 +16,25 @@
 //	import (
 //	    "github.com/darkrockmountain/gomail/sanitizer"
 //	    "github.com/darkrockmountain/gomail/common"
+//		"html"
+//		"strings"
 //	)
 //
 //	func main() {
 //	    email := common.NewEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Subject", "<p>HTML content</p>")
-//	    customSanitizer := &sanitizer.CustomSanitizer{}
-//	    email.SetCustomTextSanitizer(customSanitizer)
-//	    email.SetCustomHtmlSanitizer(customSanitizer)
+//
+//	    customTextSanitizer := sanitizer.SanitizerFunc(func(content string) string {
+//	        // Implement your custom sanitizer logic
+//	        return strings.ToLower(strings.TrimSpace(content))
+//	    })
+//
+//	    customHtmlSanitizer := sanitizer.SanitizerFunc(func(content string) string {
+//	        // Implement your custom sanitizer logic
+//	        return html.EscapeString(content)
+//	    })
+//
+//	    email.SetCustomTextSanitizer(customTextSanitizer)
+//	    email.SetCustomHtmlSanitizer(customHtmlSanitizer)
 //	}
 //
 // The sanitizer package is designed to be used in conjunction with the gomail project for flexible email content sanitization.

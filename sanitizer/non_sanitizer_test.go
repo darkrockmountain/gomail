@@ -29,4 +29,11 @@ func TestNonSanitizer(t *testing.T) {
 		result := sanitizer.Sanitize(input)
 		assert.Equal(t, expected, result)
 	})
+
+	t.Run("sanitize documentation content", func(t *testing.T) {
+		input := "<script>alert('xss')</script>"
+		expected := "<script>alert('xss')</script>"
+		result := sanitizer.Sanitize(input)
+		assert.Equal(t, expected, result)
+	})
 }

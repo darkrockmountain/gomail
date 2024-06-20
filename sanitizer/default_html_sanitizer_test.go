@@ -43,4 +43,11 @@ func TestDefaultHtmlSanitizer(t *testing.T) {
 		result := sanitizer.Sanitize(input)
 		assert.Equal(t, expected, result)
 	})
+
+	t.Run("sanitize documentation content", func(t *testing.T) {
+		input := `<script>alert('xss')</script><b>Bold</b>`
+		expected := `<b>Bold</b>`
+		result := sanitizer.Sanitize(input)
+		assert.Equal(t, expected, result)
+	})
 }

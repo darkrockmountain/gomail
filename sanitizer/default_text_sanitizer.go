@@ -24,7 +24,15 @@ func (s *defaultTextSanitizer) Sanitize(text string) string {
 var defaultTextSanitizerInstance = &defaultTextSanitizer{}
 
 // DefaultTextSanitizer returns the singleton instance of defaultTextSanitizer.
-// This ensures that the instance cannot be modified from outside the package.
+//
+// defaultTextSanitizer provides a basic implementation of the Sanitizer interface for plain text content.
+// It sanitizes plain text content by escaping special characters and trimming whitespace.
+//
+// Example usage:
+//
+//	ds := sanitizer.DefaultTextSanitizer()
+//	sanitized := ds.Sanitize(" <script>alert('xss')</script> ")
+//	// sanitized will be "&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;"
 func DefaultTextSanitizer() Sanitizer {
 	return defaultTextSanitizerInstance
 }
