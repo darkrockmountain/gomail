@@ -81,7 +81,7 @@ type Attachment = common.Attachment
 // - body: The content of the email, which can be plain text or HTML.
 // Returns:
 //   - *EmailMessage: A pointer to the newly created EmailMessage struct.
-func NewEmailMessage(from string, to []string, subject string, body string) *common.EmailMessage {
+func NewEmailMessage(from string, to []string, subject string, body string) *EmailMessage {
 	return common.NewEmailMessage(from, to, subject, body)
 }
 
@@ -98,7 +98,7 @@ func NewEmailMessage(from string, to []string, subject string, body string) *com
 // - attachments: A slice of attachments (optional).
 // Returns:
 //   - *EmailMessage: A pointer to the newly created EmailMessage struct.
-func NewFullEmailMessage(from string, to []string, subject string, cc []string, bcc []string, replyTo string, textBody string, htmlBody string, attachments []common.Attachment) *common.EmailMessage {
+func NewFullEmailMessage(from string, to []string, subject string, cc []string, bcc []string, replyTo string, textBody string, htmlBody string, attachments []Attachment) *EmailMessage {
 	return common.NewFullEmailMessage(from, to, subject, cc, bcc, replyTo, textBody, htmlBody, attachments)
 }
 
@@ -109,7 +109,7 @@ func NewFullEmailMessage(from string, to []string, subject string, cc []string, 
 // - content: The content of the file as a byte slice.
 // Returns:
 //   - *Attachment: A pointer to the newly created Attachment struct.
-func NewAttachment(filename string, content []byte) *common.Attachment {
+func NewAttachment(filename string, content []byte) *Attachment {
 	return common.NewAttachment(filename, content)
 }
 
@@ -120,7 +120,7 @@ func NewAttachment(filename string, content []byte) *common.Attachment {
 // Returns:
 //   - *Attachment: A pointer to the newly created Attachment struct.
 //   - error: An error if reading the file fails, otherwise nil.
-func NewAttachmentFromFile(filePath string) (*common.Attachment, error) {
+func NewAttachmentFromFile(filePath string) (*Attachment, error) {
 	return common.NewAttachmentFromFile(filePath)
 }
 
@@ -132,7 +132,7 @@ func NewAttachmentFromFile(filePath string) (*common.Attachment, error) {
 // Returns:
 // - []byte: A byte slice containing the complete MIME message.
 // - error: An error if constructing the MIME message fails, otherwise nil.
-func BuildMimeMessage(message *common.EmailMessage) ([]byte, error) {
+func BuildMimeMessage(message *EmailMessage) ([]byte, error) {
 	return common.BuildMimeMessage(message)
 }
 
