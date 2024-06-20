@@ -2,16 +2,6 @@ package sanitizer
 
 // nonSanitizer is an implementation of the Sanitizer interface that performs no sanitization.
 // It returns the input text unchanged. This can be useful in scenarios where no sanitization is desired.
-//
-// WARNING: Using nonSanitizer means that the input content will not be sanitized at all.
-// Ensure that this is acceptable for your use case, as it may introduce security risks, such as
-// injection attacks, if user input is not properly handled.
-//
-// Example usage:
-//
-//	ns := sanitizer.NonSanitizer()
-//	unsanitized := ns.Sanitize("<script>alert('xss')</script>")
-//	// unsanitized will be "<script>alert('xss')</script>"
 type nonSanitizer struct{}
 
 // Sanitize returns the input text without any modifications.
@@ -30,7 +20,19 @@ func (s *nonSanitizer) Sanitize(text string) string {
 var nonSanitizerInstance = &nonSanitizer{}
 
 // NonSanitizer returns the singleton instance of nonSanitizer.
-// This ensures that the instance cannot be modified from outside the package.
+//
+// nonSanitizer is an implementation of the Sanitizer interface that performs no sanitization.
+// It returns the input text unchanged. This can be useful in scenarios where no sanitization is desired.
+//
+// WARNING: Using nonSanitizer means that the input content will not be sanitized at all.
+// Ensure that this is acceptable for your use case, as it may introduce security risks, such as
+// injection attacks, if user input is not properly handled.
+//
+// Example usage:
+//
+//	ns := sanitizer.NonSanitizer()
+//	unsanitized := ns.Sanitize("<script>alert('xss')</script>")
+//	// unsanitized will be "<script>alert('xss')</script>"
 func NonSanitizer() Sanitizer {
 	return nonSanitizerInstance
 }
