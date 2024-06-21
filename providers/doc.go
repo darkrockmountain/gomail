@@ -32,13 +32,13 @@
 //
 // # Supported Providers
 //
-// - Gmail
-// - SendGrid
-// - AWS SES
-// - Mailgun
-// - Mandrill
-// - Postmark
-// - Microsoft365
-// - SparkPost
-// - SMTP
+//   - Gmail
+//   - SendGrid
+//   - AWS SES
+//   - Mailgun
+//   - Mandrill
+//   - Postmark
+//   - Microsoft365
+//   - SparkPost
+//   - SMTP
 package providers

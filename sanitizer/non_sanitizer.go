@@ -8,10 +8,10 @@ type nonSanitizer struct{}
 // This method complies with the Sanitizer interface.
 //
 // Parameters:
-// - text: The content to be "sanitized".
+//   - text: The content to be "sanitized".
 //
 // Returns:
-// - string: The input text, unchanged.
+//   - string: The input text, unchanged.
 func (s *nonSanitizer) Sanitize(text string) string {
 	return text
 }
@@ -28,7 +28,7 @@ var nonSanitizerInstance = &nonSanitizer{}
 // Ensure that this is acceptable for your use case, as it may introduce security risks, such as
 // injection attacks, if user input is not properly handled.
 //
-// Example usage:
+// Example:
 //
 //	ns := sanitizer.NonSanitizer()
 //	unsanitized := ns.Sanitize("<script>alert('xss')</script>")

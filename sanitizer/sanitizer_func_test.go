@@ -1,10 +1,12 @@
-package sanitizer
+package sanitizer_test
 
 import (
+	"fmt"
 	"html"
 	"strings"
 	"testing"
 
+	"github.com/darkrockmountain/gomail/sanitizer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,13 +16,13 @@ func TestSanitizerFunc_Sanitize(t *testing.T) {
 		name         string
 		input        string
 		want         string
-		sanitizeFunc SanitizerFunc
+		sanitizeFunc sanitizer.SanitizerFunc
 	}{
 		{
 			name:  "TrimSpaces",
 			input: "  some text  ",
 			want:  "some text",
-			sanitizeFunc: SanitizerFunc(func(message string) string {
+			sanitizeFunc: sanitizer.SanitizerFunc(func(message string) string {
 				return strings.TrimSpace(message)
 			}),
 		},
@@ -28,7 +30,7 @@ func TestSanitizerFunc_Sanitize(t *testing.T) {
 			name:  "ToUpper",
 			input: "some text",
 			want:  "SOME TEXT",
-			sanitizeFunc: SanitizerFunc(func(message string) string {
+			sanitizeFunc: sanitizer.SanitizerFunc(func(message string) string {
 				return strings.ToUpper(message)
 			}),
 		},
@@ -36,7 +38,7 @@ func TestSanitizerFunc_Sanitize(t *testing.T) {
 			name:  "ToLower",
 			input: "SOME TEXT",
 			want:  "some text",
-			sanitizeFunc: SanitizerFunc(func(message string) string {
+			sanitizeFunc: sanitizer.SanitizerFunc(func(message string) string {
 				return strings.ToLower(message)
 			}),
 		},
@@ -44,7 +46,7 @@ func TestSanitizerFunc_Sanitize(t *testing.T) {
 			name:  "EmptyString",
 			input: "",
 			want:  "",
-			sanitizeFunc: SanitizerFunc(func(message string) string {
+			sanitizeFunc: sanitizer.SanitizerFunc(func(message string) string {
 				return message
 			}),
 		},
@@ -52,7 +54,7 @@ func TestSanitizerFunc_Sanitize(t *testing.T) {
 			name:  "WhitespaceOnly",
 			input: "     ",
 			want:  "",
-			sanitizeFunc: SanitizerFunc(func(message string) string {
+			sanitizeFunc: sanitizer.SanitizerFunc(func(message string) string {
 				return strings.TrimSpace(message)
 			}),
 		},
@@ -60,7 +62,7 @@ func TestSanitizerFunc_Sanitize(t *testing.T) {
 			name:  "NoSanitization",
 			input: "no change",
 			want:  "no change",
-			sanitizeFunc: SanitizerFunc(func(message string) string {
+			sanitizeFunc: sanitizer.SanitizerFunc(func(message string) string {
 				return message
 			}),
 		},
@@ -68,7 +70,7 @@ func TestSanitizerFunc_Sanitize(t *testing.T) {
 			name:  "SpecialCharacters",
 			input: "<script>alert('xss')</script>",
 			want:  "&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;",
-			sanitizeFunc: SanitizerFunc(func(message string) string {
+			sanitizeFunc: sanitizer.SanitizerFunc(func(message string) string {
 				return html.EscapeString(message)
 			}),
 		},
@@ -79,4 +81,14 @@ func TestSanitizerFunc_Sanitize(t *testing.T) {
 			assert.Equal(t, tt.want, tt.sanitizeFunc.Sanitize(tt.input))
 		})
 	}
+}
+
+func ExampleSanitizerFunc() {
+	sanitizeFunc := sanitizer.SanitizerFunc(func(message string) string {
+		// Implement your custom sanitizer logic
+		return strings.ReplaceAll(strings.ToLower(strings.TrimSpace(message)), " ", "_")
+	})
+	sanitizedMessage := sanitizeFunc.Sanitize("  some text  ")
+	fmt.Println(sanitizedMessage)
+	// Output: some_text
 }

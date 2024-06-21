@@ -8,8 +8,9 @@ import (
 )
 
 // IsHTML checks if a string contains HTML tags.
+//
 // Parameters:
-// - str: The string to check.
+//   - str: The string to check.
 //
 // Returns:
 //   - bool: True if the string contains HTML tags, otherwise false.
@@ -22,15 +23,16 @@ func IsHTML(str string) bool {
 // This function takes a filename, extracts its extension, and returns the corresponding MIME type.
 //
 // Parameters:
-// - filename: A string containing the name of the file whose MIME type is to be determined.
+//   - filename: A string containing the name of the file whose MIME type is to be determined.
 //
 // Returns:
-// - string: The MIME type corresponding to the file extension.
+//   - string: The MIME type corresponding to the file extension.
 //
 // Example:
 //
 //	mimeType := GetMimeType("document.pdf")
-//	fmt.Println(mimeType) // Output: application/pdf
+//	fmt.Println(mimeType)
+//	//Output: application/pdf
 func GetMimeType(filename string) string {
 	ext := strings.ToLower(filepath.Ext(filename))
 	return mime.TypeByExtension(ext)
@@ -46,7 +48,7 @@ func GetMimeType(filename string) string {
 // Returns:
 //   - *string: A pointer to the input string value.
 //
-// Example usage:
+// Example:
 //
 //	name := "John Doe"
 //	namePtr := StrPtr(name)

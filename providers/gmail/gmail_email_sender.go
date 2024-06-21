@@ -22,6 +22,7 @@ type gmailMessageSenderWrapper struct {
 }
 
 // send sends a Gmail message.
+//
 // Parameters:
 //   - message: The Gmail message to be sent.
 //
@@ -41,6 +42,7 @@ func (ms *gmailMessageSenderWrapper) send(message *gmail.Message) (*gmail.Messag
 
 // SendEmail sends an email using the Gmail API.
 // It constructs the MIME message from the given EmailMessage and sends it using the Gmail API.
+//
 // Parameters:
 //   - message: The EmailMessage containing the email details.
 //
@@ -77,6 +79,7 @@ type GmailTokenManager interface {
 }
 
 // NewGmailEmailSenderOauth2 initializes a new gmailEmailSenderOauth2 instance using OAuth2 credentials and token management.
+//
 // Parameters:
 //   - ctx: The context for the API requests.
 //   - configJson: A byte slice containing the OAuth2 client credentials JSON.
@@ -111,6 +114,7 @@ func NewGmailEmailSenderOauth2(ctx context.Context, configJson []byte, tokenMana
 }
 
 // NewGmailEmailSenderServiceAccount initializes a new gmailEmailSenderServiceAccount instance using service account JSON credentials.
+//
 // Parameters:
 //   - ctx: The context for the API requests.
 //   - jsonCredentials: A byte slice containing the JSON service account credentials.
@@ -137,6 +141,7 @@ func NewGmailEmailSenderServiceAccount(ctx context.Context, jsonCredentials []by
 }
 
 // NewGmailEmailSenderAPIKey initializes a new gmailEmailSenderAPIKey instance using an API key.
+//
 // Parameters:
 //   - ctx: The context for the API requests.
 //   - apiKey: The API key to be used for authentication.
@@ -155,6 +160,7 @@ func NewGmailEmailSenderAPIKey(ctx context.Context, apiKey, user string) (*gmail
 }
 
 // NewGmailEmailSenderJWT initializes a new gmailEmailSenderJWT instance using JWT configuration.
+//
 // Parameters:
 //   - ctx: The context for the API requests.
 //   - configJson: A byte slice containing the JWT client credentials JSON.
@@ -178,6 +184,7 @@ func NewGmailEmailSenderJWT(ctx context.Context, configJson []byte, user string)
 }
 
 // NewGmailEmailSenderJWTAccess initializes a new gmailEmailSenderJWTAccess instance using a JWT access token.
+//
 // Parameters:
 //   - ctx: The context for the API requests.
 //   - jsonCredentials: A byte slice containing the JSON service account credentials.

@@ -9,10 +9,10 @@
 //
 // # Components
 //
-// - EmailMessage: Struct for constructing and manipulating email messages.
-// - Attachment: Struct for managing email attachments, including file handling and base64 encoding.
-// - Validation: Functions for validating email addresses and slices of email addresses.
-// - Sanitization: Functions for sanitizing input to prevent injection attacks.
+//   - EmailMessage: Struct for constructing and manipulating email messages.
+//   - Attachment: Struct for managing email attachments, including file handling and base64 encoding.
+//   - Validation: Functions for validating email addresses and slices of email addresses.
+//   - Sanitization: Functions for sanitizing input to prevent injection attacks.
 //
 // # Usage
 //
