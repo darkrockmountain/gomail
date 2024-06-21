@@ -11,10 +11,10 @@ type defaultHtmlSanitizer struct{}
 // It uses the bluemonday UGCPolicy to allow only safe HTML for user-generated content.
 //
 // Parameters:
-// - htmlContent: The HTML content to be sanitized.
+//   - htmlContent: The HTML content to be sanitized.
 //
 // Returns:
-// - string: The sanitized HTML content.
+//   - string: The sanitized HTML content.
 func (s *defaultHtmlSanitizer) Sanitize(htmlContent string) string {
 	// Use bluemonday's UGCPolicy for robust HTML sanitization.
 	return bluemonday.UGCPolicy().Sanitize(htmlContent)
@@ -29,7 +29,7 @@ var defaultHtmlSanitizerInstance = &defaultHtmlSanitizer{}
 // It uses the bluemonday library to sanitize HTML content, ensuring that only user-generated content
 // (UGC) is allowed. This helps prevent injection attacks by removing potentially dangerous tags and attributes.
 //
-// Example usage:
+// Example:
 //
 //	hs := sanitizer.DefaultHtmlSanitizer()
 //	sanitized := hs.Sanitize("<script>alert('xss')</script><b>Bold</b>")

@@ -69,9 +69,9 @@ func SendEmail(w http.ResponseWriter, r *http.Request) {
 // provided via the `FUNCTIONS_CUSTOMHANDLER_PORT` environment variable.
 //
 // Returns:
-// - A string representing the port number in the format ":<port-number>".
+//   - A string representing the port number in the format ":<port-number>".
 //
-// Example Usage:
+// Example:
 //
 //	port := getPort()
 //	http.ListenAndServe(port, nil)

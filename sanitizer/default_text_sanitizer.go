@@ -12,10 +12,10 @@ type defaultTextSanitizer struct{}
 // This method complies with the Sanitizer interface.
 //
 // Parameters:
-// - text: The plain text content to be sanitized.
+//   - text: The plain text content to be sanitized.
 //
 // Returns:
-// - string: The sanitized text content.
+//   - string: The sanitized text content.
 func (s *defaultTextSanitizer) Sanitize(text string) string {
 	return html.EscapeString(strings.TrimSpace(text))
 }
@@ -28,7 +28,7 @@ var defaultTextSanitizerInstance = &defaultTextSanitizer{}
 // defaultTextSanitizer provides a basic implementation of the Sanitizer interface for plain text content.
 // It sanitizes plain text content by escaping special characters and trimming whitespace.
 //
-// Example usage:
+// Example:
 //
 //	ds := sanitizer.DefaultTextSanitizer()
 //	sanitized := ds.Sanitize(" <script>alert('xss')</script> ")

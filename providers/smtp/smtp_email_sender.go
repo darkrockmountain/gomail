@@ -29,7 +29,7 @@ type smtpEmailSender struct {
 //   - user: The username for authentication.
 //   - password: The password for authentication.
 //   - authMethod: The authentication method to use (AUTH_CRAM_MD5,  AUTH_PLAIN).
-
+//
 // Returns:
 //   - *smtpEmailSender: A pointer to the initialized smtpEmailSender.
 //   - error: An error if the initialization fails, otherwise nil.
@@ -48,7 +48,7 @@ func NewSmtpEmailSender(host string, port int, user, password string, authMethod
 //   - password: The password for authentication.
 //   - authMethod: The authentication method to use (AUTH_CRAM_MD5,  AUTH_PLAIN).
 //   - connectionMethod: The connection method to use (CONN_IMPLICIT, CONN_TLS).
-
+//
 // Returns:
 //   - *smtpEmailSender: A pointer to the initialized smtpEmailSender.
 //   - error: An error if the initialization fails, otherwise nil.

@@ -36,13 +36,8 @@ func TestNewAttachment(t *testing.T) {
 	content := []byte("This is a test file content.")
 	attachment := NewAttachment(filename, content)
 
-	if attachment.filename != filename {
-		t.Errorf("NewAttachment() = %v; want %v", attachment.filename, filename)
-	}
-
-	if string(attachment.content) != string(content) {
-		t.Errorf("NewAttachment() content = %v; want %v", string(attachment.content), string(content))
-	}
+	assert.Equal(t, attachment.filename, filename)
+	assert.Equal(t, string(attachment.content), string(attachment.content))
 }
 
 func TestAttachmentEdgeCases(t *testing.T) {

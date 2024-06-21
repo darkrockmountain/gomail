@@ -82,7 +82,7 @@ func (a *Attachment) SetFilename(filename string) {
 // If the attachment is nil, it returns an empty string.
 //
 // Returns:
-// - string: The sanitized filename.
+//   - string: The sanitized filename.
 func (a *Attachment) GetFilename() string {
 	if a == nil {
 		return "nil_attachment"

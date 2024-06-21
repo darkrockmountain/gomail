@@ -34,11 +34,12 @@ type EmailMessage struct {
 
 // NewEmailMessage creates a new EmailMessage with the required fields.
 // If the body contains HTML tags, it sets the HTML field; otherwise, it sets the Text field.
+//
 // Parameters:
-// - from: The sender email address.
-// - to: A slice of recipient email addresses.
-// - subject: The email subject.
-// - body: The content of the email, which can be plain text or HTML.
+//   - from: The sender email address.
+//   - to: A slice of recipient email addresses.
+//   - subject: The email subject.
+//   - body: The content of the email, which can be plain text or HTML.
 //
 // Returns:
 //   - *EmailMessage: A pointer to the newly created EmailMessage struct.
@@ -60,16 +61,17 @@ func NewEmailMessage(from string, to []string, subject string, body string) *Ema
 }
 
 // NewFullEmailMessage creates a new EmailMessage with all fields.
+//
 // Parameters:
-// - from: The sender email address.
-// - to: A slice of recipient email addresses.
-// - subject: The email subject.
-// - cc: A slice of CC recipient email addresses (optional).
-// - bcc: A slice of BCC recipient email addresses (optional).
-// - replyTo: The reply-to email address (optional).
-// - textBody: The plain text content of the email.
-// - htmlBody: The HTML content of the email (optional).
-// - attachments: A slice of attachments (optional).
+//   - from: The sender email address.
+//   - to: A slice of recipient email addresses.
+//   - subject: The email subject.
+//   - cc: A slice of CC recipient email addresses (optional).
+//   - bcc: A slice of BCC recipient email addresses (optional).
+//   - replyTo: The reply-to email address (optional).
+//   - textBody: The plain text content of the email.
+//   - htmlBody: The HTML content of the email (optional).
+//   - attachments: A slice of attachments (optional).
 //
 // Returns:
 //   - *EmailMessage: A pointer to the newly created EmailMessage struct.
@@ -89,8 +91,10 @@ func NewFullEmailMessage(from string, to []string, subject string, cc []string, 
 }
 
 // SetFrom sets the sender email address.
+//
 // Parameters:
-// - from: The sender email address.
+//   - from: The sender email address.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) SetFrom(from string) *EmailMessage {
@@ -99,8 +103,10 @@ func (e *EmailMessage) SetFrom(from string) *EmailMessage {
 }
 
 // SetSubject sets the email subject.
+//
 // Parameters:
-// - subject: The email subject.
+//   - subject: The email subject.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) SetSubject(subject string) *EmailMessage {
@@ -109,8 +115,10 @@ func (e *EmailMessage) SetSubject(subject string) *EmailMessage {
 }
 
 // SetTo sets the recipient email addresses.
+//
 // Parameters:
-// - to: A slice of recipient email addresses.
+//   - to: A slice of recipient email addresses.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) SetTo(to []string) *EmailMessage {
@@ -119,8 +127,10 @@ func (e *EmailMessage) SetTo(to []string) *EmailMessage {
 }
 
 // SetCC sets the CC recipients email addresses.
+//
 // Parameters:
-// - cc: A slice of CC recipient email addresses.
+//   - cc: A slice of CC recipient email addresses.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) SetCC(cc []string) *EmailMessage {
@@ -129,8 +139,10 @@ func (e *EmailMessage) SetCC(cc []string) *EmailMessage {
 }
 
 // SetBCC sets the BCC recipients email addresses.
+//
 // Parameters:
-// - bcc: A slice of BCC recipient email addresses.
+//   - bcc: A slice of BCC recipient email addresses.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) SetBCC(bcc []string) *EmailMessage {
@@ -139,8 +151,10 @@ func (e *EmailMessage) SetBCC(bcc []string) *EmailMessage {
 }
 
 // SetReplyTo sets the reply-to email address.
+//
 // Parameters:
-// - replyTo: The reply-to email address.
+//   - replyTo: The reply-to email address.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) SetReplyTo(replyTo string) *EmailMessage {
@@ -149,8 +163,10 @@ func (e *EmailMessage) SetReplyTo(replyTo string) *EmailMessage {
 }
 
 // SetText sets the plain text content of the email.
+//
 // Parameters:
-// - text: The plain text content of the email.
+//   - text: The plain text content of the email.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) SetText(text string) *EmailMessage {
@@ -159,8 +175,10 @@ func (e *EmailMessage) SetText(text string) *EmailMessage {
 }
 
 // SetHTML sets the HTML content of the email.
+//
 // Parameters:
-// - html: The HTML content of the email.
+//   - html: The HTML content of the email.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) SetHTML(html string) *EmailMessage {
@@ -169,8 +187,10 @@ func (e *EmailMessage) SetHTML(html string) *EmailMessage {
 }
 
 // SetAttachments sets the attachments for the email.
+//
 // Parameters:
-// - attachments: A slice of Attachment structs to be included in the email.
+//   - attachments: A slice of Attachment structs to be included in the email.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) SetAttachments(attachments []Attachment) *EmailMessage {
@@ -179,8 +199,10 @@ func (e *EmailMessage) SetAttachments(attachments []Attachment) *EmailMessage {
 }
 
 // AddToRecipient adds a recipient email address to the To field.
+//
 // Parameters:
-// - recipient: A recipient email address to be added.
+//   - recipient: A recipient email address to be added.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) AddToRecipient(recipient string) *EmailMessage {
@@ -189,8 +211,10 @@ func (e *EmailMessage) AddToRecipient(recipient string) *EmailMessage {
 }
 
 // AddCCRecipient adds a recipient email address to the CC field.
+//
 // Parameters:
-// - recipient: A recipient email address to be added.
+//   - recipient: A recipient email address to be added.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) AddCCRecipient(recipient string) *EmailMessage {
@@ -199,8 +223,10 @@ func (e *EmailMessage) AddCCRecipient(recipient string) *EmailMessage {
 }
 
 // AddBCCRecipient adds a recipient email address to the BCC field.
+//
 // Parameters:
-// - recipient: A recipient email address to be added.
+//   - recipient: A recipient email address to be added.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) AddBCCRecipient(recipient string) *EmailMessage {
@@ -209,8 +235,10 @@ func (e *EmailMessage) AddBCCRecipient(recipient string) *EmailMessage {
 }
 
 // AddAttachment adds an attachment to the email.
+//
 // Parameters:
-// - attachment: An Attachment struct representing the file to be attached.
+//   - attachment: An Attachment struct representing the file to be attached.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) AddAttachment(attachment Attachment) *EmailMessage {
@@ -283,7 +311,7 @@ func (e *EmailMessage) GetReplyTo() string {
 // If the EmailMessage is nil, it returns an empty string.
 //
 // Returns:
-// - string: The sanitized email subject.
+//   - string: The sanitized email subject.
 func (e *EmailMessage) GetSubject() string {
 	if e == nil {
 		return ""
@@ -296,8 +324,9 @@ func (e *EmailMessage) GetSubject() string {
 
 // GetText returns the sanitized plain text content of the email.
 // It uses the custom text sanitizer if set, otherwise the default sanitizer.
+//
 // Returns:
-// - string: The sanitized plain text content of the email.
+//   - string: The sanitized plain text content of the email.
 func (e *EmailMessage) GetText() string {
 	if e == nil {
 		return ""
@@ -310,8 +339,9 @@ func (e *EmailMessage) GetText() string {
 
 // GetHTML returns the sanitized HTML content of the email.
 // It uses the custom html sanitizer if set, otherwise the default sanitizer.
+//
 // Returns:
-// - string: The sanitized HTML content of the email.
+//   - string: The sanitized HTML content of the email.
 func (e *EmailMessage) GetHTML() string {
 	if e == nil {
 		return ""
@@ -323,8 +353,10 @@ func (e *EmailMessage) GetHTML() string {
 }
 
 // SetMaxAttachmentSize sets the maximum attachment size.
+//
 // Parameters:
-// - size: The maximum size for attachments in bytes. If set to a value less than 0, all attachments are allowed.
+//   - size: The maximum size for attachments in bytes. If set to a value less than 0, all attachments are allowed.
+//
 // Returns:
 //   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) SetMaxAttachmentSize(size int) *EmailMessage {
@@ -362,10 +394,10 @@ func (e *EmailMessage) GetAttachments() []Attachment {
 // Ensure that the custom sanitizer is thoroughly tested and used with caution.
 //
 // Parameters:
-// - s: The custom Sanitizer implementation for text content.
+//   - s: The custom Sanitizer implementation for text content.
 //
 // Returns:
-// - *EmailMessage: The EmailMessage struct pointer.
+//   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) SetCustomTextSanitizer(s sanitizer.Sanitizer) *EmailMessage {
 	e.textSanitizer = s
 	return e
@@ -377,10 +409,10 @@ func (e *EmailMessage) SetCustomTextSanitizer(s sanitizer.Sanitizer) *EmailMessa
 // Ensure that the custom sanitizer is thoroughly tested and used with caution.
 //
 // Parameters:
-// - s: The custom Sanitizer implementation for HTML content.
+//   - s: The custom Sanitizer implementation for HTML content.
 //
 // Returns:
-// - *EmailMessage: The EmailMessage struct pointer.
+//   - *EmailMessage: The EmailMessage struct pointer.
 func (e *EmailMessage) SetCustomHtmlSanitizer(s sanitizer.Sanitizer) *EmailMessage {
 	e.htmlSanitizer = s
 	return e
@@ -490,11 +522,11 @@ func (e *EmailMessage) UnmarshalJSON(data []byte) error {
 // HTML content, and multiple attachments.
 //
 // Parameters:
-// - message: A pointer to an EmailMessage struct containing the details of the email to be sent.
+//   - message: A pointer to an EmailMessage struct containing the details of the email to be sent.
 //
 // Returns:
-// - []byte: A byte slice containing the complete MIME message.
-// - error: An error if constructing the MIME message fails, otherwise nil.
+//   - []byte: A byte slice containing the complete MIME message.
+//   - error: An error if constructing the MIME message fails, otherwise nil.
 //
 // Example:
 //
