@@ -17,6 +17,49 @@ const DefaultMaxAttachmentSize = 25 * 1024 * 1024 // 25 MB
 // as well as any attachments. This struct also supports custom sanitizers for text
 // and HTML content to ensure that email content is safe and sanitized according to
 // specific requirements.
+//
+// Example:
+//
+// To marshal an EmailMessage to JSON:
+//
+//	email := common.NewFullEmailMessage(
+//	    "sender@example.com",
+//	    []string{"recipient@example.com"},
+//	    "Subject",
+//	    []string{"cc@example.com"},
+//	    []string{"bcc@example.com"},
+//	    "replyto@example.com",
+//	    "This is the email content.",
+//	    "<p>This is the email content.</p>",
+//	    []common.Attachment{*common.NewAttachment("attachment1.txt", []byte("file content"))})
+//
+//	jsonData, err := json.Marshal(email)
+//	if err != nil {
+//	    fmt.Println("Error marshaling to JSON:", err)
+//	    return
+//	}
+//	fmt.Println("JSON output:", string(jsonData))
+//
+// To unmarshal an EmailMessage from JSON:
+//
+//	jsonData := `{
+//	    "from": "sender@example.com",
+//	    "to": ["recipient@example.com"],
+//	    "cc": ["cc@example.com"],
+//	    "bcc": ["bcc@example.com"],
+//	    "replyTo": "replyto@example.com",
+//	    "subject": "Subject",
+//	    "text": "This is the email content.",
+//	    "html": "<p>This is the email content.</p>",
+//	    "attachments": [{"filename": "attachment1.txt", "content": "ZmlsZSBjb250ZW50"}] // base64 encoded "file content"
+//	}`
+//	var email common.EmailMessage
+//	err := json.Unmarshal([]byte(jsonData), &email)
+//	if err != nil {
+//	    fmt.Println("Error unmarshaling from JSON:", err)
+//	    return
+//	}
+//	fmt.Printf("Unmarshaled EmailMessage: %+v\n", email)
 type EmailMessage struct {
 	from              string              // Sender email address.
 	to                []string            // Recipient email addresses.
@@ -438,20 +481,8 @@ type jsonEmailMessage struct {
 //
 // Example:
 //
-//	email := &EmailMessage{
-//	    from:    "sender@example.com",
-//	    to:      []string{"recipient@example.com"},
-//	    cc:      []string{"cc@example.com"},
-//	    bcc:     []string{"bcc@example.com"},
-//	    replyTo: "replyto@example.com",
-//	    subject: "Subject",
-//	    text:    "This is the email content.",
-//	    html:    "<p>This is the email content.</p>",
-//	    attachments: []Attachment{
-//	        {filename: "attachment1.txt", content: []byte("content1")},
-//	    },
-//	    maxAttachmentSize: 1024,
-//	}
+//	email := common.NewFullEmailMessage("sender@example.com", []string{"recipient@example.com"}, "Subject", []string{"cc@example.com"}, []string{"bcc@example.com"}, "replyto@example.com", "This is the email content.", "<p>This is the email content.</p>", []common.Attachment{*common.NewAttachment("attachment1.txt", []byte("file content"))})
+//
 //	jsonData, err := json.Marshal(email)
 //	if err != nil {
 //	    fmt.Println("Error marshaling to JSON:", err)
@@ -489,9 +520,9 @@ func (e *EmailMessage) MarshalJSON() ([]byte, error) {
 //	    "subject": "Subject",
 //	    "text": "This is the email content.",
 //	    "html": "<p>This is the email content.</p>",
-//	    "attachments": [{"filename": "attachment1.txt", "content": "Y29udGVudDE="}] // base64 encoded "content1"
+//	    "attachments": [{"filename": "attachment1.txt", "content": "ZmlsZSBjb250ZW50"}] // base64 encoded "file content"
 //	}`
-//	var email EmailMessage
+//	var email common.EmailMessage
 //	err := json.Unmarshal([]byte(jsonData), &email)
 //	if err != nil {
 //	    fmt.Println("Error unmarshaling from JSON:", err)
@@ -503,6 +534,9 @@ func (e *EmailMessage) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, aux); err != nil {
 		return err
 	}
+
+	//adding the default max attachment size by default
+	e.maxAttachmentSize = DefaultMaxAttachmentSize
 
 	e.from = aux.From
 	e.to = aux.To
