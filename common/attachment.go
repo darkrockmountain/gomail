@@ -11,6 +11,32 @@ import (
 
 // Attachment represents an email attachment with its filename and content.
 // Use this struct to specify files to be attached to the email.
+//
+// Example:
+//
+// To marshal an Attachment to JSON:
+//
+//	attachment := common.NewAttachment("document.pdf", []byte("file content"))
+//	jsonData, err := json.Marshal(attachment)
+//	if err != nil {
+//	    fmt.Println("Error marshaling to JSON:", err)
+//	    return
+//	}
+//	fmt.Println("JSON output:", string(jsonData))
+//
+// To unmarshal an Attachment from JSON:
+//
+//	jsonData := `{
+//	    "filename": "file.txt",
+//	    "content": "ZmlsZSBjb250ZW50" // base64 encoded "file content"
+//	}`
+//	var attachment common.Attachment
+//	err := json.Unmarshal([]byte(jsonData), &attachment)
+//	if err != nil {
+//	    fmt.Println("Error unmarshaling from JSON:", err)
+//	    return
+//	}
+//	fmt.Printf("Unmarshaled Attachment: %+v\n", attachment)
 type Attachment struct {
 	filename string // The name of the file.
 	content  []byte // The content of the file.

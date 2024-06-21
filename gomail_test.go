@@ -4,7 +4,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/darkrockmountain/gomail/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,7 +37,7 @@ func TestNewFullEmailMessage(t *testing.T) {
 	subject := "Test Subject"
 	textBody := "This is a test text body."
 	htmlBody := "<p>This is a test HTML body.</p>"
-	attachments := []common.Attachment{
+	attachments := []Attachment{
 		*NewAttachment("test.txt", []byte("test content")),
 	}
 
