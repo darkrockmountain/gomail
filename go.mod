@@ -1,6 +1,6 @@
 module github.com/darkrockmountain/gomail
 
-go 1.22.4
+go 1.22.5
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.6.0
