@@ -17,11 +17,12 @@
 //
 //	import (
 //	    "github.com/darkrockmountain/gomail"
+//	    "github.com/darkrockmountain/gomail/providers/sendgrid"
 //	)
 //
 //	func main() {
-//	    sender := providers.NewSendGridEmailSender("your-api-key")
-//	    err := sender.SendEmail("recipient@example.com", "Subject", "Email body")
+//	    sender := sendgrid.NewSendGridEmailSender("your-api-key")
+//	    err := sender.SendEmail(gomail.NewEmailMessage([]string{"recipient@example.com"},"Subject","Email body"))
 //	    if err != nil {
 //	        log.Fatal(err)
 //	    }
@@ -31,13 +32,13 @@
 //
 // # Supported Providers
 //
-// - Gmail
-// - SendGrid
-// - AWS SES
-// - Mailgun
-// - Mandrill
-// - Postmark
-// - Microsoft365
-// - SparkPost
-// - SMTP
+//   - Gmail
+//   - SendGrid
+//   - AWS SES
+//   - Mailgun
+//   - Mandrill
+//   - Postmark
+//   - Microsoft365
+//   - SparkPost
+//   - SMTP
 package providers

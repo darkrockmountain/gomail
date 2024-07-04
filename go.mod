@@ -1,6 +1,6 @@
 module github.com/darkrockmountain/gomail
 
-go 1.22.3
+go 1.22.5
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.7.0
@@ -47,11 +47,11 @@ require (
 	github.com/googleapis/gax-go/v2 v2.12.5 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.1.0 // indirect
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
+	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/std-uritemplate/std-uritemplate/go v1.0.2 // indirect
@@ -70,4 +70,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-retract [v0.0.0, v0.5.1] // Retract versions up to v0.5.1 due to migration from GitLab to GitHub. Previous versions will not be maintained.
+retract [v0.0.0, v0.5.9] // Retract versions up to v0.5.x due to migration from GitLab to GitHub. Previous versions will not be maintained.

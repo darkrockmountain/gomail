@@ -46,52 +46,52 @@ go mod tidy
 ### Usage
 
 #### 1. SMTP Email Sender
-- Configure your SMTP server settings in `providers/smtp_email_sender.go`.
+- Configure your SMTP server settings in `providers/smpt/smtp_email_sender.go`.
 - Refer to the [SMTP Credentials Documentation](./docs/SMTP_Credentials.md) for details on obtaining credentials.
 - Run the `smtpExample()` function to send a test email.
 
 #### 2. Gmail Email Sender
-- Configure your Gmail API credentials in `providers/gmail_email_sender.go`.
+- Configure your Gmail API credentials in `providers/gmail/gmail_email_sender.go`.
 - Refer to the [Gmail Credentials Documentation](./docs/Gmail_Credentials_API_Key.md) for details on obtaining credentials.
 - Run the `gExample()` function to send a test email.
 
 #### 3. Gmail Email Sender using OAuth2
-- Configure your Gmail API credentials and token in `providers/gmail_email_sender_oauth2.go`.
+- Configure your Gmail API credentials and token in `providers/gmail/gmail_email_sender_oauth2.go`.
 - Refer to the [Gmail OAuth2 Credentials Documentation](./docs/Gmail_Credentials_OAuth2.md) for details on obtaining credentials.
 - Run the `gExampleOauth2()` function to send a test email.
 
 #### 4. Microsoft 365 Email Sender
-- Configure your Microsoft Graph API credentials in `providers/microsoft365_email_sender.go`.
+- Configure your Microsoft Graph API credentials in `providers/microsoft365/microsoft365_email_sender.go`.
 - Refer to the [Microsoft 365 Credentials Documentation](./docs/Microsoft365_Credentials_ROPC.md) for details on obtaining credentials.
 - Run the `msGraphExample()` function to send a test email.
 
 #### 5. SendGrid Email Sender
-- Configure your SendGrid API key in `providers/sendgrid_email_sender.go`.
+- Configure your SendGrid API key in `providers/sendgrid/sendgrid_email_sender.go`.
 - Refer to the [SendGrid Credentials Documentation](./docs/SendGrid_Credentials.md) for details on obtaining credentials.
 - Run the `sendgridExample()` function to send a test email.
 
 #### 6. AWS SES Email Sender
-- Configure your AWS SES credentials in `providers/ses_email_sender.go`.
+- Configure your AWS SES credentials in `providers/ses/ses_email_sender.go`.
 - Refer to the [AWS SES Credentials Documentation](./docs/AWS_SES_Credentials.md) for details on obtaining credentials.
 - Run the `sesExample()` function to send a test email.
 
 #### 7. Mailgun Email Sender
-- Configure your Mailgun API key in `providers/mailgun_email_sender.go`.
+- Configure your Mailgun API key in `providers/mailgun/mailgun_email_sender.go`.
 - Refer to the [Mailgun Credentials Documentation](./docs/Mailgun_Credentials.md) for details on obtaining credentials.
 - Run the `mailgunExample()` function to send a test email.
 
 #### 8. Mandrill Email Sender
-- Configure your Mandrill API key in `providers/mandrill_email_sender.go`.
+- Configure your Mandrill API key in `providers/mandrill/mandrill_email_sender.go`.
 - Refer to the [Mandrill Credentials Documentation](./docs/Mandrill_Credentials.md) for details on obtaining credentials.
 - Run the `mandrillExample()` function to send a test email.
 
 #### 9. Postmark Email Sender
-- Configure your Postmark API key in `providers/postmark_email_sender.go`.
+- Configure your Postmark API key in `providers/postmark/postmark_email_sender.go`.
 - Refer to the [Postmark Credentials Documentation](./docs/Postmark_Credentials.md) for details on obtaining credentials.
 - Run the `postmarkExample()` function to send a test email.
 
 #### 10. SparkPost Email Sender
-- Configure your SparkPost API key in `providers/sparkpost_email_sender.go`.
+- Configure your SparkPost API key in `providers/sparkpost/sparkpost_email_sender.go`.
 - Refer to the [SparkPost Documentation](https://developers.sparkpost.com/api/) for details on obtaining credentials.
 - Run the `sparkpostExample()` function to send a test email.
 
