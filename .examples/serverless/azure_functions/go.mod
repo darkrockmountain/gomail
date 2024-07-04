@@ -1,6 +1,6 @@
 module github.com/darkrockmountain/gomail/azure_email_sender
 
-go 1.22.4
+go 1.22.5
 
 require github.com/darkrockmountain/gomail v0.6.0-beta
 
