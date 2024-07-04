@@ -139,7 +139,7 @@ func composeMsMessage(message *gomail.EmailMessage) *models.Message {
 		for i, attachment := range attachments {
 			fileAttachment := models.NewFileAttachment()
 			fileAttachment.SetName(common.StrPtr(attachment.GetFilename()))
-			fileAttachment.SetContentBytes([]byte(attachment.GetBase64StringContent()))
+			fileAttachment.SetContentBytes(attachment.GetRawContent())
 			msAttachments[i] = fileAttachment
 		}
 		msMessage.SetAttachments(msAttachments)

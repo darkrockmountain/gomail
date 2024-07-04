@@ -3,7 +3,6 @@ package microsoft365
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"fmt"
 	"net/http"
 	"testing"
@@ -185,7 +184,7 @@ func TestComposeMessage_WithAttachments(t *testing.T) {
 
 	msMessage := composeMsMessage(message)
 
-	attachmentBase64 := []byte(base64.StdEncoding.EncodeToString([]byte("test_attachment_content")))
+	attachmentBase64 := []byte("test_attachment_content")
 
 	assert.NotNil(t, msMessage)
 	assert.Equal(t, "test.txt", *msMessage.GetAttachments()[0].(*models.FileAttachment).GetName())
@@ -286,7 +285,7 @@ func TestComposeMessage_LargeAttachment(t *testing.T) {
 
 	assert.NotNil(t, msMessage)
 	assert.Equal(t, "large.txt", *msMessage.GetAttachments()[0].(*models.FileAttachment).GetName())
-	assert.True(t, bytes.Equal(attachment.GetBase64Content(), msMessage.GetAttachments()[0].(*models.FileAttachment).GetContentBytes()), "Attachment do not match")
+	assert.True(t, bytes.Equal(attachment.GetRawContent(), msMessage.GetAttachments()[0].(*models.FileAttachment).GetContentBytes()), "Attachment do not match")
 }
 
 func TestComposeMessage_MultipleAttachments(t *testing.T) {
@@ -304,9 +303,9 @@ func TestComposeMessage_MultipleAttachments(t *testing.T) {
 
 	assert.NotNil(t, msMessage)
 	assert.Equal(t, "test1.txt", *msMessage.GetAttachments()[0].(*models.FileAttachment).GetName())
-	assert.Equal(t, attachment1.GetBase64Content(), msMessage.GetAttachments()[0].(*models.FileAttachment).GetContentBytes())
+	assert.Equal(t, attachment1.GetRawContent(), msMessage.GetAttachments()[0].(*models.FileAttachment).GetContentBytes())
 	assert.Equal(t, "test2.txt", *msMessage.GetAttachments()[1].(*models.FileAttachment).GetName())
-	assert.Equal(t, attachment2.GetBase64Content(), msMessage.GetAttachments()[1].(*models.FileAttachment).GetContentBytes())
+	assert.Equal(t, attachment2.GetRawContent(), msMessage.GetAttachments()[1].(*models.FileAttachment).GetContentBytes())
 }
 
 func TestComposeMessage_MissingFields(t *testing.T) {
