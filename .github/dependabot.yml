@@ -23,3 +23,27 @@ updates:
       all:
         patterns:
           - "*"
+  - package-ecosystem: "gomod"
+    directory: "/.examples/serverless/aws_lambda"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "16:00"
+  - package-ecosystem: "gomod"
+    directory: "/.examples/serverless/azure_functions"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "16:00"
+  - package-ecosystem: "gomod"
+    directory: "/.examples/serverless/digitalocean_functions/packages/email-sender/send-email"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "16:00"
+  - package-ecosystem: "gomod"
+    directory: "/.examples/serverless/google_cloud_functions"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "16:00"

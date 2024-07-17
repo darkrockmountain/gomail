@@ -10,6 +10,7 @@ import (
 )
 
 // ParseCredentials parses the OAuth2 credentials JSON byte slice and returns an *oauth2.Config.
+//
 // Parameters:
 //   - credentialsJSON: A byte slice containing the OAuth2 client credentials JSON.
 //
@@ -25,6 +26,7 @@ func ParseCredentials(credentialsJSON []byte) (*oauth2.Config, error) {
 }
 
 // ParseToken parses the OAuth2 token JSON byte slice and returns an *oauth2.Token.
+//
 // Parameters:
 //   - tokenJSON: A byte slice containing the OAuth2 token JSON.
 //
