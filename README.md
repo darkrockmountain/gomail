@@ -6,6 +6,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/darkrockmountain/gomail?branch=master&kill_cache=1)](https://goreportcard.com/report/github.com/darkrockmountain/gomail)
 [![codecov](https://codecov.io/gh/darkrockmountain/gomail/graph/badge.svg?token=NC0O7RMK2X)](https://codecov.io/gh/darkrockmountain/gomail)
 ![Vulnerability assessment Status](https://github.com/darkrockmountain/gomail/actions/workflows/govulncheck.yaml/badge.svg)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdarkrockmountain%2Fgomail.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdarkrockmountain%2Fgomail?ref=badge_shield&issueType=license)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fdarkrockmountain%2Fgomail.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2Fdarkrockmountain%2Fgomail?ref=badge_shield&issueType=security)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/darkrockmountain/gomail/badge)](https://scorecard.dev/viewer/?uri=github.com/darkrockmountain/gomail)
 [![GitHub Release](https://img.shields.io/github/v/release/darkrockmountain/gomail)](https://github.com/darkrockmountain/gomail/releases)
