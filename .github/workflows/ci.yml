@@ -29,7 +29,7 @@ jobs:
         ## is set as an array of branches to upload to Codecov. 
         ## Example --var CODECOV_BRANCHES='["main", "feature-1"]'
       - name: Upload coverage to Codecov
-        if: ${{ contains(fromJson(vars.CODECOV_BRANCHES), github.ref_name)  }}
+        if: ${{ vars.CODECOV_BRANCHES && contains(fromJson(vars.CODECOV_BRANCHES), github.ref_name) }}
         uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # v4.5.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
