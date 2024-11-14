@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/darkrockmountain/gomail"
 	"github.com/darkrockmountain/gomail/common"
 	azureAuth "github.com/microsoft/kiota-authentication-azure-go"
 	msgraph "github.com/microsoftgraph/msgraph-sdk-go"
@@ -26,14 +25,14 @@ type mSGraphEmailSender struct {
 //
 // Returns:
 //   - error: An error if the email sending fails, otherwise nil.
-func (s *mSGraphEmailSender) SendEmail(message *gomail.EmailMessage) error {
+func (s *mSGraphEmailSender) SendEmail(message *common.EmailMessage) error {
 	if s.userRequestBuilder == nil {
 		return fmt.Errorf("error: no user request builder available")
 	}
 
 	msMessage := composeMsMessage(message)
 	// Send the message
-	sendMailPostRequestBody := graphusers.NewItemSendmailSendMailPostRequestBody()
+	sendMailPostRequestBody := graphusers.NewItemSendMailPostRequestBody()
 	sendMailPostRequestBody.SetMessage(msMessage)
 
 	err := s.userRequestBuilder.SendMail().Post(context.Background(), sendMailPostRequestBody, nil)
@@ -52,7 +51,7 @@ func (s *mSGraphEmailSender) SendEmail(message *gomail.EmailMessage) error {
 //
 // Returns:
 //   - *models.Message: A pointer to the composed Message object ready to be sent via the Microsoft Graph API.
-func composeMsMessage(message *gomail.EmailMessage) *models.Message {
+func composeMsMessage(message *common.EmailMessage) *models.Message {
 
 	// Create the message
 	body := models.NewItemBody()
