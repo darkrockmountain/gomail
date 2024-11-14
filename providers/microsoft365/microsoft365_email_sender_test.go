@@ -25,81 +25,6 @@ func TestEmailSenderImplementation(t *testing.T) {
 	var _ gomail.EmailSender = (*mSGraphEmailSender)(nil)
 }
 
-type MockMSAuthenticationProvider struct {
-}
-
-func (m *MockMSAuthenticationProvider) AuthenticateRequest(context context.Context, request *abstractions.RequestInformation, additionalAuthenticationContext map[string]interface{}) error {
-	return nil
-}
-
-// MSMockRoundTripper implements the http.RoundTripper interface
-type MSMockRoundTripper struct {
-	Response *http.Response
-	Err      error
-}
-
-func (m *MSMockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	if m.Err != nil {
-		return nil, m.Err
-	}
-
-	return &http.Response{
-		StatusCode: http.StatusOK,
-		Header:     make(http.Header),
-	}, nil
-}
-
-func mockItemSendMailRequestBuild(err error) *users.UserItemRequestBuilder {
-
-	defaultClient := &http.Client{
-		Transport: &MSMockRoundTripper{
-			Err: err,
-		},
-	}
-
-	adapter, err := khttp.NewNetHttpRequestAdapterWithParseNodeFactoryAndSerializationWriterFactoryAndHttpClient(&MockMSAuthenticationProvider{}, nil, nil, defaultClient)
-	if err != nil {
-		panic(err)
-	}
-
-	abstractions.RegisterDefaultSerializer(func() serialization.SerializationWriterFactory { return ksJson.NewJsonSerializationWriterFactory() })
-	abstractions.RegisterDefaultSerializer(func() serialization.SerializationWriterFactory { return ksText.NewTextSerializationWriterFactory() })
-	abstractions.RegisterDefaultSerializer(func() serialization.SerializationWriterFactory { return ksForm.NewFormSerializationWriterFactory() })
-	abstractions.RegisterDefaultSerializer(func() serialization.SerializationWriterFactory { return ksMP.NewMultipartSerializationWriterFactory() })
-	abstractions.RegisterDefaultDeserializer(func() serialization.ParseNodeFactory { return ksJson.NewJsonParseNodeFactory() })
-	abstractions.RegisterDefaultDeserializer(func() serialization.ParseNodeFactory { return ksText.NewTextParseNodeFactory() })
-	abstractions.RegisterDefaultDeserializer(func() serialization.ParseNodeFactory { return ksForm.NewFormParseNodeFactory() })
-
-	sendMail := users.UserItemRequestBuilder{
-		BaseRequestBuilder: abstractions.BaseRequestBuilder{
-			RequestAdapter: adapter,
-			UrlTemplate:    "{+baseurl}/users{?%24count,%24expand,%24filter,%24orderby,%24search,%24select,%24top}",
-			PathParameters: map[string]string{"user%2Did": "testUserID"},
-		},
-	}
-	return &sendMail
-}
-
-func TestSendEmail(t *testing.T) {
-	attachment := *gomail.NewAttachment("test.txt", []byte("test_attachment_content"))
-
-	message := gomail.NewEmailMessage(
-		"sender@example.com",
-		[]string{"recipient@example.com"},
-		"Test Subject",
-		"Test Body",
-	).AddAttachment(attachment)
-
-	reqBuild := mockItemSendMailRequestBuild(nil)
-	sender := &mSGraphEmailSender{
-		userRequestBuilder: reqBuild,
-	}
-
-	err := sender.SendEmail(message)
-	assert.NoError(t, err)
-
-}
-
 func TestComposeMessage_PlainTextEmail(t *testing.T) {
 	message := gomail.NewEmailMessage(
 		"sender@example.com",
@@ -325,6 +250,85 @@ func TestComposeMessage_MissingFields(t *testing.T) {
 	assert.Nil(t, msMessage.GetBccRecipients())
 	assert.Nil(t, msMessage.GetReplyTo())
 	assert.Nil(t, msMessage.GetAttachments())
+}
+
+type MockMSAuthenticationProvider struct{}
+
+func (m *MockMSAuthenticationProvider) AuthenticateRequest(context context.Context, request *abstractions.RequestInformation, additionalAuthenticationContext map[string]interface{}) error {
+	return nil
+}
+
+type MSMockRoundTripper struct {
+	Response *http.Response
+	Err      error
+}
+
+func (m *MSMockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	if m.Err != nil {
+		return nil, m.Err
+	}
+
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     make(http.Header),
+	}, nil
+}
+
+// Initialize the HTTP client and serializers once and reuse them:
+var defaultClient *http.Client
+var adapter abstractions.RequestAdapter
+
+func init() {
+	defaultClient = &http.Client{
+		Transport: &MSMockRoundTripper{},
+	}
+
+	var err error
+	adapter, err = khttp.NewNetHttpRequestAdapterWithParseNodeFactoryAndSerializationWriterFactoryAndHttpClient(&MockMSAuthenticationProvider{}, nil, nil, defaultClient)
+	if err != nil {
+		panic(err)
+	}
+
+	abstractions.RegisterDefaultSerializer(func() serialization.SerializationWriterFactory { return ksJson.NewJsonSerializationWriterFactory() })
+	abstractions.RegisterDefaultSerializer(func() serialization.SerializationWriterFactory { return ksText.NewTextSerializationWriterFactory() })
+	abstractions.RegisterDefaultSerializer(func() serialization.SerializationWriterFactory { return ksForm.NewFormSerializationWriterFactory() })
+	abstractions.RegisterDefaultSerializer(func() serialization.SerializationWriterFactory { return ksMP.NewMultipartSerializationWriterFactory() })
+	abstractions.RegisterDefaultDeserializer(func() serialization.ParseNodeFactory { return ksJson.NewJsonParseNodeFactory() })
+	abstractions.RegisterDefaultDeserializer(func() serialization.ParseNodeFactory { return ksText.NewTextParseNodeFactory() })
+	abstractions.RegisterDefaultDeserializer(func() serialization.ParseNodeFactory { return ksForm.NewFormParseNodeFactory() })
+}
+
+func mockItemSendMailRequestBuild(err error) *users.UserItemRequestBuilder {
+	defaultClient.Transport.(*MSMockRoundTripper).Err = err
+
+	sendMail := users.UserItemRequestBuilder{
+		BaseRequestBuilder: abstractions.BaseRequestBuilder{
+			RequestAdapter: adapter,
+			UrlTemplate:    "{+baseurl}/users{?%24count,%24expand,%24filter,%24orderby,%24search,%24select,%24top}",
+			PathParameters: map[string]string{"user%2Did": "testUserID"},
+		},
+	}
+	return &sendMail
+}
+
+func TestSendEmail(t *testing.T) {
+	attachment := *gomail.NewAttachment("test.txt", []byte("test_attachment_content"))
+
+	message := gomail.NewEmailMessage(
+		"sender@example.com",
+		[]string{"recipient@example.com"},
+		"Test Subject",
+		"Test Body",
+	).AddAttachment(attachment)
+
+	reqBuild := mockItemSendMailRequestBuild(nil)
+	sender := &mSGraphEmailSender{
+		userRequestBuilder: reqBuild,
+	}
+
+	err := sender.SendEmail(message)
+	assert.NoError(t, err)
+
 }
 
 func TestSendEmail_FailedSend(t *testing.T) {
