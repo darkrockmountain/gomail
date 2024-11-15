@@ -1,42 +1,84 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
-template: |
-  # What's Changed
-
-  $CHANGES
-
-  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
 
 categories:
-  - title: 'Breaking'
-    label: 'type: breaking'
-  - title: 'New'
-    label: 'type: feature'
-  - title: 'Bug Fixes'
-    label: 'type: bug'
-  - title: 'Maintenance'
-    label: 'type: maintenance'
+  - title: 'Fixes'
+    labels:
+      - 'fix'
+      - 'bugfix'
+      - 'bug'
+  - title: 'Refactoring'
+    labels:
+      - 'refactor'
+      - 'refactoring'
   - title: 'Documentation'
-    label: 'type: docs'
-  - title: 'Other changes'
-  - title: 'Dependency Updates'
-    label: 'type: dependencies'
+    labels:
+      - 'docs'
+      - 'documentation'
+  - title: 'Features'
+    labels:
+      - 'feat'
+      - 'feature'
+      - 'enhancement'
+  - title: 'Maintenance'
+    labels:
+      - 'chore'
+      - 'maintenance'
     collapse-after: 5
+
+autolabeler:
+  - label: 'docs'
+    files:
+      - '*.md'
+    branch:
+      - /docs\/.+/'
+    title:
+      - '/docs/\(/i'
+  - label: 'bug'
+    branch:
+      - '/fix\/.+/'
+      - '/Hotfix\/.+/'
+    title:
+      - '/fix/\(/i'
+  - label: 'enhancement'
+    branch:
+      - '/feature\/.+/'
+    title:
+      - '/feature/\(/i'
+      - '/feat/\(/i'
+  - label: 'chore'
+    branch:
+      - '/chore\/.+/'
+    title:
+      - '/chore/\(/i'
+  - label: 'refactor'
+    branch:
+      - '/refactor\/.+/'
+    title:
+      - '/refactor/\(/i'
+
+      
 
 version-resolver:
   major:
     labels:
-      - 'type: breaking'
+      - 'major'
   minor:
     labels:
-      - 'type: feature'
+      - 'minor'
   patch:
     labels:
-      - 'type: bug'
-      - 'type: maintenance'
-      - 'type: docs'
-      - 'type: dependencies'
-      - 'type: security'
+      - 'patch'
+  default: patch
 
-exclude-labels:
-  - 'skip-changelog'
+
+template: |
+  ## Description
+
+  This release marks the full release of version v$RESOLVED_VERSION with significant improvements and additions. Key changes include bug fixes, refactoring, updated documentation, new features, and maintenance updates.
+  
+  ## What's Changed
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
