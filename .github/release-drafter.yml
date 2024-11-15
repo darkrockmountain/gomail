@@ -24,6 +24,9 @@ categories:
     labels:
       - 'chore'
       - 'maintenance'
+  - title: 'Dependencies'
+    labels:
+      - 'dependencies'
     collapse-after: 5
 
 autolabeler:
