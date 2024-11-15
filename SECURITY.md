@@ -4,16 +4,16 @@
 
 We currently support the following versions with security updates:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| > 0.5.1  | :white_check_mark: |
-| <= 0.5.1 | :x:                |
+| Version  | Supported          |
+| -------- | ------------------ |
+| >=0.6.0  | :white_check_mark: |
+| <= 0.5.9 | :x:                |
 
 ## Reporting a Vulnerability
 
 If you discover a security vulnerability, please do the following:
 
-1. **Do not open an issue describing the vulnerability.** This could expose the vulnerability to the public. 
+1. **Do not open an issue describing the vulnerability.** This could expose the vulnerability to the public.
 2. Use GitHub's private vulnerability reporting feature to report the vulnerability directly. You can do this by using Github's [private reporting feature](../../security/advisories/new) of the repository and clicking "Report a vulnerability".
 3. Alternatively, you can contact us directly at [security@darkrockmountain.com](mailto:security@darkrockmountain.com) with the following details:
    - A description of the vulnerability and its impact.
